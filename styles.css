@@ -1,0 +1,204 @@
+/* ============================================================================
+   SWISS PRECISION MEETS MODERN SAAS PLAYGROUND (styles.css)
+   University of Fribourg (UniFR) — Practical AI Automation Command Center
+   ============================================================================ */
+
+:root {
+  --indigo-primary: #4F46E5;
+  --indigo-glow: rgba(79, 70, 229, 0.25);
+  --emerald-primary: #10B981;
+  --emerald-glow: rgba(16, 185, 129, 0.35);
+  --slate-bg: #F8FAFC;
+  --card-bg: rgba(255, 255, 255, 0.92);
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+  transition: font-size 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* PROJECTOR / LECTURE MODE: +20% Base Font Size & De-cluttered UI */
+html.projector-mode {
+  font-size: 19.2px; /* +20% scale across all rem units */
+}
+
+html.projector-mode .projector-hide {
+  display: none !important;
+}
+
+html.projector-mode .projector-expand {
+  max-width: 100% !important;
+}
+
+html.projector-mode .prompt-code-pre {
+  font-size: 0.95rem !important;
+  line-height: 1.65 !important;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #F8FAFC;
+  color: #0F172A;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, .font-display {
+  font-family: 'Plus Jakarta Sans', 'Inter', sans-serif;
+  letter-spacing: -0.025em;
+}
+
+code, pre, .font-mono {
+  font-family: 'JetBrains Mono', monospace;
+}
+
+/* Subtle Swiss Architectural Grid Background */
+.swiss-grid-bg {
+  background-color: #F8FAFC;
+  background-image: 
+    linear-gradient(to right, rgba(226, 232, 240, 0.6) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(226, 232, 240, 0.6) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+/* Glassmorphism Cards */
+.glass-card {
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.04), 0 2px 6px -1px rgba(15, 23, 42, 0.02);
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.2s ease;
+}
+
+.glass-card-interactive:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 28px -4px rgba(79, 70, 229, 0.1), 0 4px 10px -2px rgba(15, 23, 42, 0.04);
+  border-color: rgba(79, 70, 229, 0.35);
+}
+
+/* Copy Button Emerald Glow State */
+.copy-btn-copied {
+  background-color: #10B981 !important;
+  color: #FFFFFF !important;
+  border-color: #059669 !important;
+  box-shadow: 0 0 20px rgba(16, 185, 129, 0.55), 0 0 6px rgba(16, 185, 129, 0.4) !important;
+  transform: scale(1.02);
+}
+
+/* Animated Flow Pipeline Connectors */
+@keyframes pulseFlow {
+  0% {
+    stroke-dashoffset: 24;
+  }
+  100% {
+    stroke-dashoffset: 0;
+  }
+}
+
+.animated-dashed-line {
+  stroke-dasharray: 6 6;
+  animation: pulseFlow 0.9s linear infinite;
+}
+
+@keyframes nodePulseRing {
+  0% {
+    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 12px rgba(79, 70, 229, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
+  }
+}
+
+.bridge-node-active {
+  animation: nodePulseRing 2s infinite;
+  border-color: #4F46E5 !important;
+  background: linear-gradient(180deg, #FFFFFF 0%, #EEF2FF 100%) !important;
+  transform: translateY(-4px);
+}
+
+@keyframes emeraldPulseRing {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.emerald-pulse {
+  animation: emeraldPulseRing 2s infinite;
+}
+
+/* View Transition Animation */
+@keyframes viewFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.view-animate-in {
+  animation: viewFadeIn 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Code Block Dark Theme Scrollbar */
+.code-scroll::-webkit-scrollbar-track {
+  background: #0F172A;
+}
+
+.code-scroll::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 9999px;
+}
+
+/* Sidebar Collapsible Transitions */
+#left-sidebar {
+  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+#left-sidebar.sidebar-collapsed {
+  width: 5rem !important;
+}
+
+#left-sidebar.sidebar-collapsed .sidebar-text,
+#left-sidebar.sidebar-collapsed .sidebar-badge,
+#left-sidebar.sidebar-collapsed .sidebar-footer-details {
+  display: none !important;
+}
+
+#left-sidebar.sidebar-collapsed .sidebar-item-btn {
+  justify-content: center !important;
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+}
+

@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>The Unfair Advantage: Practical AI Automation | UniFR </title>
+  <meta name="description"
+    content="Interactive 4-hour AI Automation lecture University of Fribourg (UniFR) Teach and Learn Together Days." />
+
+  <!-- Google Fonts: Plus Jakarta Sans, Inter, JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap"
+    rel="stylesheet" />
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Canvas Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body class="swiss-grid-bg min-h-screen flex flex-col selection:bg-indigo-600 selection:text-white">
+
+  <!-- ========================================================================
+       TOP UTILITY NAVBAR (Sticky)
+       ======================================================================== -->
+  <header
+    class="sticky top-0 z-40 h-16 bg-white/90 backdrop-blur-md border-b border-slate-200/90 px-4 sm:px-6 flex items-center justify-between gap-3">
+    <!-- Left: Brand & Mobile Sidebar Toggle -->
+    <div class="flex items-center gap-3">
+      <button type="button" onclick="window.WorkshopApp.toggleMobileSidebar()"
+        class="lg:hidden p-2 rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-100 cursor-pointer"
+        aria-label="Open Navigation Menu">
+        <i data-lucide="menu" class="w-5 h-5"></i>
+      </button>
+
+      <button type="button" onclick="window.WorkshopApp.toggleSidebarCollapse()"
+        class="hidden lg:inline-flex p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-100 hover:text-slate-900 cursor-pointer"
+        title="Collapse / Expand Sidebar">
+        <i data-lucide="panel-left" class="w-4 h-4"></i>
+      </button>
+
+      <div class="flex items-center gap-2.5">
+        <div
+          class="w-9 h-9 rounded-xl bg-indigo-600 text-white font-display font-extrabold text-sm flex items-center justify-center shadow-sm shadow-indigo-600/30">
+          UF
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <span id="nav-meta-title" data-config-meta="title"
+              class="font-display font-extrabold text-sm sm:text-base text-slate-900 tracking-tight">
+              The Unfair Advantage: Practical AI Automation
+            </span>
+            <span id="nav-meta-version" data-config-meta="version"
+              class="hidden sm:inline-block text-[11px] font-mono font-semibold px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200">
+              2026.1 • Swiss Precision Edition
+            </span>
+          </div>
+          <p id="nav-meta-subtitle" class="text-[11px] text-slate-500 hidden md:block">
+            <span data-config-meta="initiative">Teach and Learn Together Days • University of Fribourg (UniFR)</span>
+            <span class="mx-1 text-slate-300">•</span>
+            <span data-config-meta="location">University of Fribourg • Hybrid (PER 21 Salle B205)</span>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Center/Right Utility Controls -->
+    <div class="flex items-center gap-2.5 sm:gap-3">
+      <!-- 1. Workshop Progress Tracker -->
+      <div class="hidden xl:flex items-center gap-3 bg-slate-50 border border-slate-200/90 rounded-xl px-3.5 py-1.5">
+        <div class="flex items-center gap-1.5 text-xs font-mono font-semibold text-slate-700">
+          <i data-lucide="trophy" class="w-3.5 h-3.5 text-emerald-600"></i>
+          <span id="workshop-progress-text">0/13 Steps (0%)</span>
+        </div>
+        <div class="w-28 h-2 rounded-full bg-slate-200 overflow-hidden">
+          <div id="workshop-progress-bar"
+            class="h-full bg-gradient-to-r from-indigo-600 to-emerald-500 transition-all duration-300"
+            style="width: 0%"></div>
+        </div>
+      </div>
+
+      <!-- 2. Live Schedule Pill (Connected to config.js meta.duration & schedule) -->
+      <button type="button" onclick="window.WorkshopApp.toggleScheduleModal()"
+        class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-amber-50 hover:bg-amber-100/80 text-amber-900 border border-amber-200 font-mono text-xs font-semibold transition-all cursor-pointer"
+        title="View Morning Schedule & Coffee Breaks">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+        <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-700"></i>
+        <span id="nav-schedule-duration" data-config-meta="duration" class="hidden sm:inline">08:15 – 12:00 (4
+          Hours)</span>
+        <span class="sm:hidden">Schedule</span>
+      </button>
+
+      <!-- 3. Projector / Lecture Mode Toggle (+20% Font Scale) -->
+      <button type="button" id="projector-mode-btn" onclick="window.WorkshopApp.toggleProjectorMode()"
+        class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-display font-semibold text-xs transition-all cursor-pointer"
+        title="Projector / Lecture Mode: Increases base font size by 20% and hides secondary clutter">
+        <i data-lucide="projector" class="w-4 h-4"></i>
+        <span class="hidden md:inline">Projector Mode:</span>
+        <span id="projector-mode-status" class="font-mono text-[11px] font-bold">OFF</span>
+      </button>
+
+      <!-- 4. Prominent GitHub / Portfolio Button (Connected to config.js links.githubProfile / githubRepo) -->
+      <a id="top-github-btn" data-config-link="githubProfile" href="#" target="_blank" rel="noopener noreferrer"
+        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-display font-semibold text-xs shadow-sm transition-all">
+        <i data-lucide="github" class="w-3.5 h-3.5 text-amber-400"></i>
+        <span class="hidden sm:inline"> ⭐ GitHub &amp; Portfolio</span>
+        <span class="sm:hidden">GitHub</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- ========================================================================
+       MAIN DUAL-PANE WORKSPACE (Persistent Left Sidebar + Single Active View)
+       ======================================================================== -->
+  <div class="flex-1 flex relative">
+    <!-- Mobile Backdrop -->
+    <div id="mobile-sidebar-backdrop" onclick="window.WorkshopApp.toggleMobileSidebar()"
+      class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-30 hidden lg:hidden"></div>
+
+    <!-- Left Sidebar Navigation Menu -->
+    <aside id="left-sidebar"
+      class="fixed lg:sticky top-16 left-0 z-30 w-72 h-[calc(100vh-4rem)] bg-white/95 backdrop-blur-md border-r border-slate-200/90 flex flex-col justify-between p-3.5 -translate-x-full lg:translate-x-0 transition-transform duration-200 overflow-y-auto shrink-0">
+      <div class="space-y-2">
+        <div class="px-2.5 py-1.5 flex items-center justify-between">
+          <span id="sidebar-modules-count"
+            class="sidebar-text font-mono text-[11px] uppercase tracking-wider text-slate-400 font-semibold">
+            7 Interactive Modules
+          </span>
+          <span
+            class="sidebar-badge text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+            Zero-Code
+          </span>
+        </div>
+
+        <!-- Dynamically Populated Module List -->
+        <nav id="sidebar-nav-list" class="space-y-1.5" aria-label="Workshop Modules"></nav>
+      </div>
+
+      <!-- Sidebar Footer: Clean Zero-Paywall Note -->
+      <div class="sidebar-footer-details mt-6 pt-4 border-t border-slate-200/80 px-2">
+        <div class="p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-xs space-y-1">
+          <div class="font-display font-bold text-slate-800 flex items-center gap-1.5">
+            <i data-lucide="key-round" class="w-3.5 h-3.5 text-indigo-600 shrink-0"></i>
+            <span>No Premium Paywall</span>
+          </div>
+          <p class="text-[11px] text-slate-500 leading-relaxed">
+            Standard UniFR M365 connectors + The Spreadsheet Bridge.
+          </p>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Active View Container (Strictly 1 View Rendered at a Time) -->
+    <main id="main-scroll-area" class="flex-1 min-w-0 p-4 sm:p-6 lg:p-10">
+      <div id="main-viewport-container" class="max-w-6xl mx-auto projector-expand"></div>
+    </main>
+  </div>
+
+  <!-- ========================================================================
+       LIVE SCHEDULE MODAL (Connected to config.js meta & schedule)
+       ======================================================================== -->
+  <div id="schedule-modal"
+    class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs hidden flex items-center justify-center p-4">
+    <div
+      class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 shadow-2xl border border-slate-200 space-y-5 max-h-[85vh] overflow-y-auto">
+      <div class="flex items-center justify-between gap-4 border-b border-slate-200 pb-4">
+        <div>
+          <span data-config-meta="initiative" class="text-xs font-mono uppercase text-indigo-600 font-bold block">Teach
+            and Learn Together Days • University of Fribourg (UniFR)</span>
+          <h3 class="font-display font-bold text-xl text-slate-900">
+            Workshop Schedule (<span data-config-meta="duration">08:15 – 12:00 (4 Hours)</span>)
+          </h3>
+          <p data-config-meta="location" class="text-xs font-mono text-slate-500 mt-0.5">University of Fribourg • Hybrid
+            (PER 21 Salle B205)</p>
+        </div>
+        <button type="button" onclick="window.WorkshopApp.toggleScheduleModal()"
+          class="p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 cursor-pointer">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div id="modal-schedule-list" class="space-y-3"></div>
+    </div>
+  </div>
+
+  <!-- Centralized Config + Modular Views + Main Controller -->
+  <script src="./config.js"></script>
+  <script src="./views.js"></script>
+  <script src="./app.js"></script>
+</body>
+
+</html>
