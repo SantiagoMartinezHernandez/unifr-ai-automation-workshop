@@ -866,35 +866,68 @@ window.WorkshopViews = (function () {
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 <!-- Step 1: Input & Mask -->
                 <div class="space-y-2 bg-slate-950/60 p-4 rounded-xl border border-white/10">
-                  <div class="flex items-center justify-between">
-                    <span class="text-xs font-mono font-bold text-indigo-300">1. Confidential Text (Browser Memory):</span>
-                    <button
-                      type="button"
-                      onclick="if (window.AnonymizerApp) window.AnonymizerApp.sanitizeText()"
-                      class="px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-display font-bold text-xs shadow cursor-pointer inline-flex items-center gap-1"
-                    >
-                      <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
-                      <span>Mask PII</span>
-                    </button>
+                  <div class="flex items-center justify-between flex-wrap gap-2">
+                    <span class="text-xs font-mono font-bold text-indigo-300">1. Confidential Text or File:</span>
+                    <div class="flex items-center gap-2">
+                      <label class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-white font-mono text-[11px] font-semibold cursor-pointer inline-flex items-center gap-1 border border-white/15" title="Load PDF, Word (.docx), or Excel (.xlsx)">
+                        <i data-lucide="upload" class="w-3 h-3 text-indigo-300"></i>
+                        <span>Load File</span>
+                        <input
+                          type="file"
+                          accept=".pdf,.docx,.doc,.xlsx,.xls,.csv,.txt,.md"
+                          class="hidden"
+                          onchange="if (window.AnonymizerApp) window.AnonymizerApp.handleFileUpload(this.files[0])"
+                        />
+                      </label>
+                      <button
+                        type="button"
+                        onclick="if (window.AnonymizerApp) window.AnonymizerApp.sanitizeText()"
+                        class="px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-display font-bold text-xs shadow cursor-pointer inline-flex items-center gap-1"
+                      >
+                        <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                        <span>Mask PII</span>
+                      </button>
+                    </div>
                   </div>
+
+                  <!-- Loaded file indicator banner if file parsed -->
+                  <div id="loaded-file-banner" class="hidden p-2 rounded-lg bg-indigo-900/60 border border-indigo-500/40 text-[11px] font-mono text-indigo-200 flex items-center justify-between gap-2">
+                    <div class="truncate">
+                      <span id="loaded-file-name" class="font-bold text-white truncate">document.pdf</span>
+                      <span id="loaded-file-meta" class="text-indigo-300 text-[10px] block truncate">Parsed with layout preserved</span>
+                    </div>
+                    <button type="button" onclick="if (window.AnonymizerApp) window.AnonymizerApp.clearLoadedFile()" class="text-[10px] text-rose-300 hover:text-rose-100 underline shrink-0 cursor-pointer">Remove</button>
+                  </div>
+
                   <textarea
                     id="raw-input-text"
                     rows="4"
-                    placeholder="Type or paste confidential student inquiry, grade, or email..."
+                    placeholder="Upload a PDF/Word/Excel file or paste confidential student inquiry, grade, or email..."
                     class="w-full p-3 rounded-lg border border-slate-700 bg-slate-900 text-xs font-mono text-slate-100 focus:outline-none focus:border-indigo-400"
                   ></textarea>
 
                   <div id="sanitized-result-container" class="hidden space-y-2 pt-2 border-t border-white/10">
                     <div class="flex items-center justify-between">
                       <span class="text-[11px] font-mono text-emerald-400 font-bold">Sanitized (Send to ChatGPT):</span>
-                      <button
-                        type="button"
-                        onclick="if (window.AnonymizerApp) window.AnonymizerApp.copySanitizedText(this)"
-                        class="px-2.5 py-1 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] cursor-pointer inline-flex items-center gap-1"
-                      >
-                        <i data-lucide="copy" class="w-3 h-3"></i>
-                        <span class="copy-btn-label">Copy</span>
-                      </button>
+                      <div class="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onclick="if (window.AnonymizerApp) window.AnonymizerApp.copySanitizedText(this)"
+                          class="px-2.5 py-1 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] cursor-pointer inline-flex items-center gap-1"
+                        >
+                          <i data-lucide="copy" class="w-3 h-3"></i>
+                          <span class="copy-btn-label">Copy</span>
+                        </button>
+                        <button
+                          type="button"
+                          onclick="if (window.AnonymizerApp) window.AnonymizerApp.downloadSanitizedFile()"
+                          class="px-2 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-[11px] cursor-pointer inline-flex items-center gap-1 border border-slate-700"
+                          title="Download sanitized file"
+                        >
+                          <i data-lucide="download" class="w-3 h-3 text-emerald-400"></i>
+                          <span>File</span>
+                        </button>
+                      </div>
                     </div>
                     <div
                       id="sanitized-output-text"
@@ -937,14 +970,25 @@ window.WorkshopViews = (function () {
                   <div id="restored-result-container" class="hidden space-y-2 pt-2 border-t border-white/10">
                     <div class="flex items-center justify-between">
                       <span class="text-[11px] font-mono text-emerald-300 font-bold">Restored Original Details:</span>
-                      <button
-                        type="button"
-                        onclick="if (window.AnonymizerApp) window.AnonymizerApp.copyRestoredText(this)"
-                        class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-white font-bold text-[11px] cursor-pointer inline-flex items-center gap-1 border border-slate-600"
-                      >
-                        <i data-lucide="copy" class="w-3 h-3"></i>
-                        <span class="copy-btn-label">Copy</span>
-                      </button>
+                      <div class="flex items-center gap-1.5">
+                        <button
+                          type="button"
+                          onclick="if (window.AnonymizerApp) window.AnonymizerApp.copyRestoredText(this)"
+                          class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-white font-bold text-[11px] cursor-pointer inline-flex items-center gap-1 border border-slate-600"
+                        >
+                          <i data-lucide="copy" class="w-3 h-3"></i>
+                          <span class="copy-btn-label">Copy</span>
+                        </button>
+                        <button
+                          type="button"
+                          onclick="if (window.AnonymizerApp) window.AnonymizerApp.downloadRestoredFile()"
+                          class="px-2 py-1 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] cursor-pointer inline-flex items-center gap-1"
+                          title="Download restored document"
+                        >
+                          <i data-lucide="download" class="w-3 h-3"></i>
+                          <span>File</span>
+                        </button>
+                      </div>
                     </div>
                     <div
                       id="restored-output-text"

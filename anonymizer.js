@@ -4,6 +4,7 @@
  * University of Fribourg (UniFR) — Practical AI Automation Command Center
  * ============================================================================
  * 100% Client-Side In-Browser Memory (sessionStorage). Zero Server Transmission.
+ * Multi-format Document Support: PDF, Word (.docx), Excel (.xlsx, .csv), Plain Text.
  */
 
 window.AnonymizerApp = (function () {
@@ -11,6 +12,7 @@ window.AnonymizerApp = (function () {
 
   // In-memory session dictionary: { "[TAG]": "Real Value" }
   let sessionMap = {};
+  let currentLoadedFileName = "";
 
   // Load session map from sessionStorage on load
   function loadSessionMap() {
@@ -72,12 +74,344 @@ Summary: This research initiative investigates autonomous agentic workflow integ
     const input = document.getElementById("raw-input-text");
     if (input && PRESETS[type]) {
       input.value = PRESETS[type];
+      currentLoadedFileName = `sample_${type}.txt`;
+      showFileSuccessState(`sample_${type}.txt`, PRESETS[type].length, PRESETS[type].length, "Sample Loaded");
       sanitizeText();
     }
   }
 
   /**
-   * Core PII Detection & Tokenization Engine
+   * ==========================================================================
+   * MULTI-FORMAT DOCUMENT EXTRACTION (PDF, DOCX, XLSX, TXT)
+   * Extra careful PDF parsing: Preserves structural lines, headers & paragraphs!
+   * ==========================================================================
+   */
+
+  /**
+   * PDF.js Extractor:
+   * Sorts visual items top-to-bottom (Y) and left-to-right (X), groups tokens
+   * on the same baseline, detects vertical line gaps to emit clean paragraph breaks
+   * instead of collapsing the entire document into a single line.
+   */
+  async function parsePdfTextPreservingStructure(arrayBuffer) {
+    if (!window.pdfjsLib) {
+      throw new Error("PDF.js library is not loaded. Please verify your internet connection.");
+    }
+
+    if (!window.pdfjsLib.GlobalWorkerOptions.workerSrc) {
+      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
+        "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    }
+
+    const loadingTask = window.pdfjsLib.getDocument({ data: arrayBuffer });
+    const pdfDoc = await loadingTask.promise;
+    const numPages = pdfDoc.numPages;
+    const pageOutputs = [];
+
+    for (let pageNum = 1; pageNum <= numPages; pageNum++) {
+      const page = await pdfDoc.getPage(pageNum);
+      const textContent = await page.getTextContent({ normalizeWhitespace: true });
+      const items = textContent.items;
+
+      if (!items || items.length === 0) continue;
+
+      // Filter non-empty items
+      const validItems = items.filter((item) => item.str && item.str.trim().length > 0);
+      if (validItems.length === 0) continue;
+
+      // PDF coordinate space has Y=0 at the bottom.
+      // Top of page has highest Y. Sort descending Y (top to bottom), then ascending X (left to right).
+      validItems.sort((a, b) => {
+        const yA = a.transform[5];
+        const yB = b.transform[5];
+        const xA = a.transform[4];
+        const xB = b.transform[4];
+
+        if (Math.abs(yA - yB) <= 3.5) {
+          return xA - xB;
+        }
+        return yB - yA;
+      });
+
+      // Group items into horizontal lines
+      const lines = [];
+      let currentLine = [];
+      let currentY = validItems[0].transform[5];
+      let currentLineHeight = validItems[0].height || 12;
+
+      validItems.forEach((item) => {
+        const itemY = item.transform[5];
+        const itemH = item.height || 12;
+
+        if (Math.abs(itemY - currentY) <= 3.5) {
+          currentLine.push(item);
+          if (itemH > currentLineHeight) currentLineHeight = itemH;
+        } else {
+          if (currentLine.length > 0) {
+            lines.push({
+              y: currentY,
+              height: currentLineHeight,
+              items: currentLine
+            });
+          }
+          currentLine = [item];
+          currentY = itemY;
+          currentLineHeight = itemH;
+        }
+      });
+
+      if (currentLine.length > 0) {
+        lines.push({
+          y: currentY,
+          height: currentLineHeight,
+          items: currentLine
+        });
+      }
+
+      // Reconstruct lines into clean structured paragraphs
+      let pageText = "";
+      for (let i = 0; i < lines.length; i++) {
+        const line = lines[i];
+        line.items.sort((a, b) => a.transform[4] - b.transform[4]);
+
+        let lineStr = "";
+        for (let j = 0; j < line.items.length; j++) {
+          const it = line.items[j];
+          if (j > 0) {
+            const prev = line.items[j - 1];
+            const prevRight = prev.transform[4] + (prev.width || 0);
+            const gap = it.transform[4] - prevRight;
+            if (gap > 2) {
+              lineStr += " ";
+            }
+          }
+          lineStr += it.str;
+        }
+
+        lineStr = lineStr.trim();
+        if (!lineStr) continue;
+
+        pageText += lineStr;
+
+        if (i < lines.length - 1) {
+          const nextLine = lines[i + 1];
+          const verticalGap = line.y - nextLine.y;
+          const threshold = line.height * 1.45;
+
+          // Double newline for paragraph breaks, single newline for line wrap
+          if (verticalGap > threshold) {
+            pageText += "\n\n";
+          } else {
+            pageText += "\n";
+          }
+        }
+      }
+
+      if (numPages > 1) {
+        pageOutputs.push(`--- [Page ${pageNum} of ${numPages}] ---\n\n${pageText.trim()}`);
+      } else {
+        pageOutputs.push(pageText.trim());
+      }
+    }
+
+    return pageOutputs.join("\n\n");
+  }
+
+  /**
+   * Word (.docx) Extractor via Mammoth.js
+   */
+  async function parseDocxText(arrayBuffer) {
+    if (!window.mammoth) {
+      throw new Error("Mammoth.js library is not available.");
+    }
+    const result = await window.mammoth.extractRawText({ arrayBuffer: arrayBuffer });
+    return result.value.trim();
+  }
+
+  /**
+   * Excel (.xlsx, .xls, .csv) Extractor via SheetJS
+   */
+  async function parseExcelText(arrayBuffer) {
+    if (!window.XLSX) {
+      throw new Error("SheetJS (XLSX) library is not available.");
+    }
+    const workbook = window.XLSX.read(arrayBuffer, { type: "array" });
+    const sheetOutputs = [];
+
+    workbook.SheetNames.forEach((sheetName) => {
+      const worksheet = workbook.Sheets[sheetName];
+      const textData = window.XLSX.utils.sheet_to_csv(worksheet, { FS: "\t", blankrows: false });
+      if (textData && textData.trim()) {
+        if (workbook.SheetNames.length > 1) {
+          sheetOutputs.push(`=== Sheet: ${sheetName} ===\n\n${textData.trim()}`);
+        } else {
+          sheetOutputs.push(textData.trim());
+        }
+      }
+    });
+
+    return sheetOutputs.join("\n\n");
+  }
+
+  /**
+   * Plain text / Markdown Extractor
+   */
+  function parsePlainText(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = (e) => resolve(e.target.result);
+      reader.onerror = (err) => reject(err);
+      reader.readAsText(file, "UTF-8");
+    });
+  }
+
+  /**
+   * Unified File Upload Dispatcher
+   */
+  async function handleFileUpload(file) {
+    if (!file) return;
+
+    const fileName = file.name;
+    const ext = fileName.split(".").pop().toLowerCase();
+
+    showFileLoadingState(fileName);
+
+    try {
+      let extractedText = "";
+
+      if (ext === "pdf") {
+        const buffer = await file.arrayBuffer();
+        extractedText = await parsePdfTextPreservingStructure(buffer);
+      } else if (ext === "docx" || ext === "doc") {
+        const buffer = await file.arrayBuffer();
+        extractedText = await parseDocxText(buffer);
+      } else if (ext === "xlsx" || ext === "xls" || ext === "csv") {
+        const buffer = await file.arrayBuffer();
+        extractedText = await parseExcelText(buffer);
+      } else {
+        extractedText = await parsePlainText(file);
+      }
+
+      if (!extractedText.trim()) {
+        throw new Error("No readable text could be extracted. The file may be an image-only scan or empty.");
+      }
+
+      const rawInput = document.getElementById("raw-input-text");
+      if (rawInput) {
+        rawInput.value = extractedText;
+      }
+
+      currentLoadedFileName = fileName;
+      showFileSuccessState(fileName, file.size, extractedText.length);
+
+      // Auto-trigger PII sanitize
+      sanitizeText();
+    } catch (err) {
+      console.error("File extraction error:", err);
+      showFileErrorState(err.message || "Failed to process file.");
+    }
+  }
+
+  function showFileLoadingState(fileName) {
+    const banner = document.getElementById("loaded-file-banner");
+    const nameEl = document.getElementById("loaded-file-name");
+    const metaEl = document.getElementById("loaded-file-meta");
+
+    if (banner && nameEl && metaEl) {
+      banner.classList.remove("hidden");
+      nameEl.textContent = fileName;
+      metaEl.textContent = "Extracting document structure & paragraphs in browser RAM...";
+    }
+  }
+
+  function showFileSuccessState(fileName, fileSize, charCount, customBadge) {
+    const banner = document.getElementById("loaded-file-banner");
+    const nameEl = document.getElementById("loaded-file-name");
+    const metaEl = document.getElementById("loaded-file-meta");
+
+    if (banner && nameEl && metaEl) {
+      banner.classList.remove("hidden");
+      nameEl.textContent = fileName;
+      const sizeKb = Math.round(fileSize / 1024) || 1;
+      metaEl.textContent = customBadge || `✅ ${sizeKb} KB • ${charCount.toLocaleString()} Characters • Layout & Structure Preserved`;
+    }
+
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+      window.lucide.createIcons();
+    }
+  }
+
+  function showFileErrorState(errorMsg) {
+    const banner = document.getElementById("loaded-file-banner");
+    const nameEl = document.getElementById("loaded-file-name");
+    const metaEl = document.getElementById("loaded-file-meta");
+
+    if (banner && nameEl && metaEl) {
+      banner.classList.remove("hidden");
+      nameEl.textContent = "Error reading file";
+      metaEl.textContent = `⚠️ ${errorMsg}`;
+    }
+  }
+
+  function clearLoadedFile() {
+    currentLoadedFileName = "";
+    const banner = document.getElementById("loaded-file-banner");
+    const fileInput = document.getElementById("document-file-input");
+    const rawInput = document.getElementById("raw-input-text");
+
+    if (banner) banner.classList.add("hidden");
+    if (fileInput) fileInput.value = "";
+    if (rawInput) rawInput.value = "";
+  }
+
+  /**
+   * Setup Drag-and-Drop Listeners on file drop zone
+   */
+  function setupDragAndDrop() {
+    const dropZone = document.getElementById("file-drop-zone");
+    if (!dropZone) return;
+
+    ["dragenter", "dragover"].forEach((eventName) => {
+      dropZone.addEventListener(
+        eventName,
+        (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dropZone.classList.add("border-indigo-500", "bg-indigo-50/60");
+        },
+        false
+      );
+    });
+
+    ["dragleave", "drop"].forEach((eventName) => {
+      dropZone.addEventListener(
+        eventName,
+        (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          dropZone.classList.remove("border-indigo-500", "bg-indigo-50/60");
+        },
+        false
+      );
+    });
+
+    dropZone.addEventListener(
+      "drop",
+      (e) => {
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        if (files && files.length > 0) {
+          handleFileUpload(files[0]);
+        }
+      },
+      false
+    );
+  }
+
+  /**
+   * ==========================================================================
+   * CORE PII DETECTION & TOKENIZATION ENGINE
+   * ==========================================================================
    */
   function sanitizeText() {
     const inputEl = document.getElementById("raw-input-text");
@@ -85,11 +419,10 @@ Summary: This research initiative investigates autonomous agentic workflow integ
 
     const rawText = inputEl.value;
     if (!rawText.trim()) {
-      alert("Please enter or paste confidential text first.");
+      alert("Please enter text or upload a document first.");
       return;
     }
 
-    // Reset or expand session map
     const newMap = Object.assign({}, sessionMap);
     let sanitized = rawText;
 
@@ -104,12 +437,10 @@ Summary: This research initiative investigates autonomous agentic workflow integ
       custom: 0
     };
 
-    // Helper: Register token replacement
     function replaceEntity(value, tagPrefix, statKey) {
       const cleanVal = value.trim();
       if (!cleanVal || cleanVal.length < 2) return;
 
-      // Check if value already has an existing tag in session
       let existingTag = Object.keys(newMap).find((k) => newMap[k].toLowerCase() === cleanVal.toLowerCase());
       if (!existingTag) {
         const count = Object.keys(newMap).filter((k) => k.startsWith(`[${tagPrefix}_`)).length + 1;
@@ -118,16 +449,18 @@ Summary: This research initiative investigates autonomous agentic workflow integ
         stats[statKey]++;
       }
 
-      // Safe replace all occurrences (escape regex special characters)
       const escaped = cleanVal.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
       const regex = new RegExp(escaped, "g");
       sanitized = sanitized.replace(regex, existingTag);
     }
 
-    // 1. Custom Keywords (User Specified)
+    // 1. Custom Keywords
     const customInput = document.getElementById("custom-keywords-input");
     if (customInput && customInput.value.trim()) {
-      const customs = customInput.value.split(",").map((s) => s.trim()).filter(Boolean);
+      const customs = customInput.value
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
       customs.forEach((c) => {
         replaceEntity(c, "CUSTOM_ENTITY", "custom");
       });
@@ -138,17 +471,18 @@ Summary: This research initiative investigates autonomous agentic workflow integ
     const emails = rawText.match(emailRegex) || [];
     emails.forEach((email) => replaceEntity(email, "EMAIL", "emails"));
 
-    // 3. Swiss AHV/AVS Numbers (e.g. 756.9281.3829.44 or 756 9281 3829 44)
+    // 3. Swiss AHV/AVS Numbers
     const ahvRegex = /\b756[.\s]\d{4}[.\s]\d{4}[.\s]\d{2}\b/g;
     const ahvs = rawText.match(ahvRegex) || [];
     ahvs.forEach((ahv) => replaceEntity(ahv, "SWISS_AHV", "ahv"));
 
-    // 4. Swiss & International Phone Numbers (+41 26 300 71 11, 079 123 45 67, etc.)
-    const phoneRegex = /(?:\+41|0041|0)\s?(?:[1-9]\d{1})\s?(?:\d{3})\s?(?:\d{2})\s?(?:\d{2})|(?:\+41\s?[1-9]\d(?:\s?\d{3}){2})/g;
+    // 4. Swiss & International Phone Numbers
+    const phoneRegex =
+      /(?:\+41|0041|0)\s?(?:[1-9]\d{1})\s?(?:\d{3})\s?(?:\d{2})\s?(?:\d{2})|(?:\+41\s?[1-9]\d(?:\s?\d{3}){2})/g;
     const phones = rawText.match(phoneRegex) || [];
     phones.forEach((phone) => replaceEntity(phone, "PHONE", "phones"));
 
-    // 5. Student & Matriculation IDs (e.g. 21-492-801, Matricule: 18-932-110, ID: 849204)
+    // 5. Student & Matriculation IDs
     const studentIdRegex = /\b\d{2}-\d{3}-\d{3}\b|\b(?:Student ID|Matricul[ea]|Matrikelnummer)[\s:]*([A-Za-z0-9-]+)\b/gi;
     let match;
     while ((match = studentIdRegex.exec(rawText)) !== null) {
@@ -156,20 +490,23 @@ Summary: This research initiative investigates autonomous agentic workflow integ
       replaceEntity(idVal, "STUDENT_ID", "studentIds");
     }
 
-    // 6. Monetary Amounts & Budgets (e.g. CHF 14,500, CHF 248'500, €45,000, $20,000)
-    const amountRegex = /(?:CHF|EUR|USD|\$|€|£)\s?\d{1,3}(?:['.,\s]\d{3})*(?:\.\d{2})?|\d{1,3}(?:['.,\s]\d{3})*(?:\.\d{2})?\s?(?:CHF|EUR|USD|Fr\.)/gi;
+    // 6. Monetary Amounts & Budgets
+    const amountRegex =
+      /(?:CHF|EUR|USD|\$|€|£)\s?\d{1,3}(?:['.,\s]\d{3})*(?:\.\d{2})?|\d{1,3}(?:['.,\s]\d{3})*(?:\.\d{2})?\s?(?:CHF|EUR|USD|Fr\.)/gi;
     const amounts = rawText.match(amountRegex) || [];
     amounts.forEach((amt) => replaceEntity(amt, "AMOUNT", "amounts"));
 
-    // 7. Academic Titles & Personal Names (Prof. Dr. First Last, Madame First Last, etc.)
-    const nameWithTitleRegex = /(?:Prof\.|Professor|Dr\.|Doctor|Mr\.|Ms\.|Mrs\.|Monsieur|Madame|Herr|Frau)\s+(?:Dr\.\s+)?([A-ZÀ-ÿ][a-zà-ÿ]+(?:\s+[A-ZÀ-ÿ][a-zà-ÿ]+){1,3})/g;
+    // 7. Academic Titles & Personal Names
+    const nameWithTitleRegex =
+      /(?:Prof\.|Professor|Dr\.|Doctor|Mr\.|Ms\.|Mrs\.|Monsieur|Madame|Herr|Frau)\s+(?:Dr\.\s+)?([A-ZÀ-ÿ][a-zà-ÿ]+(?:\s+[A-ZÀ-ÿ][a-zà-ÿ]+){1,3})/g;
     while ((match = nameWithTitleRegex.exec(rawText)) !== null) {
       const fullName = match[0].trim();
       replaceEntity(fullName, "PERSON", "names");
     }
 
-    // Common greetings with names (e.g., Dear Lukas Müller, Chère Sophie Dubois, Best regards,\nLukas Müller)
-    const greetingNameRegex = /(?:Dear|Chère?|Liebe[rn]?|Best regards,?\s+|Sincerely,?\s+)\s*([A-ZÀ-ÿ][a-zà-ÿ]+(?:\s+[A-ZÀ-ÿ][a-zà-ÿ]+){1,2})/g;
+    // Common greetings with names
+    const greetingNameRegex =
+      /(?:Dear|Chère?|Liebe[rn]?|Best regards,?\s+|Sincerely,?\s+)\s*([A-ZÀ-ÿ][a-zà-ÿ]+(?:\s+[A-ZÀ-ÿ][a-zà-ÿ]+){1,2})/g;
     while ((match = greetingNameRegex.exec(rawText)) !== null) {
       if (match[1]) {
         replaceEntity(match[1].trim(), "PERSON", "names");
@@ -188,7 +525,6 @@ Summary: This research initiative investigates autonomous agentic workflow integ
 
     if (container) container.classList.remove("hidden");
     if (outputEl) {
-      // Highlight tags visually in output
       outputEl.textContent = sanitized;
     }
 
@@ -197,7 +533,6 @@ Summary: This research initiative investigates autonomous agentic workflow integ
       statsBadge.textContent = `${totalDetected} Items Masked in Session`;
     }
 
-    // Render detected pills
     if (pillsList) {
       pillsList.innerHTML = Object.keys(sessionMap)
         .map(
@@ -212,13 +547,11 @@ Summary: This research initiative investigates autonomous agentic workflow integ
         .join("");
     }
 
-    // Pre-populate AI response input with simulated response if empty
     const aiInput = document.getElementById("ai-response-input");
     if (aiInput && !aiInput.value.trim()) {
       aiInput.value = generateSimulatedAiResponse(sanitized);
     }
 
-    // Smooth scroll down to sanitized box
     if (container) {
       container.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
@@ -228,9 +561,6 @@ Summary: This research initiative investigates autonomous agentic workflow integ
     }
   }
 
-  /**
-   * Helper: Generate a realistic AI response containing the masked tokens
-   */
   function generateSimulatedAiResponse(sanitizedPrompt) {
     const personTags = Object.keys(sessionMap).filter((k) => k.startsWith("[PERSON_"));
     const emailTags = Object.keys(sessionMap).filter((k) => k.startsWith("[EMAIL_"));
@@ -244,13 +574,13 @@ Summary: This research initiative investigates autonomous agentic workflow integ
 
     return `Dear ${recipient},
 
-Thank you for reaching out regarding your academic file and thesis registration.
+Thank you for reaching out regarding your academic file and evaluation.
 
-We have reviewed the records for student ID ${studentId}. I am pleased to inform you that your registration is confirmed. In addition, the requested departmental grant allocation of ${amount} has been approved by the committee.
+We have reviewed the official records for student ID ${studentId}. I am pleased to inform you that the submission has been officially approved. In addition, the requested allocation of ${amount} has been validated by the committee.
 
 A formal notification has also been sent to your primary address at ${email}.
 
-Please let me know if you require any additional certificates.
+Please let me know if you require any additional documentation.
 
 Kind regards,
 Academic Examination Office
@@ -268,7 +598,9 @@ University of Fribourg (UniFR)`;
   }
 
   /**
-   * Core De-Anonymization & Restoration Engine
+   * ==========================================================================
+   * CORE DE-ANONYMIZATION & RESTORATION ENGINE
+   * ==========================================================================
    */
   function restoreText() {
     const aiInput = document.getElementById("ai-response-input");
@@ -282,7 +614,6 @@ University of Fribourg (UniFR)`;
 
     let restored = rawAiText;
 
-    // Substitute each session token back to its real value
     Object.keys(sessionMap).forEach((tag) => {
       const realValue = sessionMap[tag];
       const escaped = tag.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -298,7 +629,6 @@ University of Fribourg (UniFR)`;
       outputEl.textContent = restored;
     }
 
-    // Trigger subtle confetti on successful restore
     if (typeof window.confetti === "function") {
       window.confetti({
         particleCount: 35,
@@ -314,7 +644,54 @@ University of Fribourg (UniFR)`;
   }
 
   /**
-   * Clipboard Copy Handlers with Visual Glow Feedback
+   * ==========================================================================
+   * FILE DOWNLOAD HELPERS
+   * ==========================================================================
+   */
+  function downloadTextFile(content, filename) {
+    const blob = new Blob([content], { type: "text/plain;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  function downloadSanitizedFile() {
+    const outputEl = document.getElementById("sanitized-output-text");
+    if (!outputEl || !outputEl.textContent.trim()) {
+      alert("Please mask text or upload a document first.");
+      return;
+    }
+
+    const baseName = currentLoadedFileName
+      ? currentLoadedFileName.replace(/\.[^/.]+$/, "")
+      : "sanitized_prompt";
+    const ext = currentLoadedFileName && currentLoadedFileName.endsWith(".csv") ? "csv" : "txt";
+    downloadTextFile(outputEl.textContent, `${baseName}_MASKED.${ext}`);
+  }
+
+  function downloadRestoredFile() {
+    const outputEl = document.getElementById("restored-output-text");
+    if (!outputEl || !outputEl.textContent.trim()) {
+      alert("Please restore text first.");
+      return;
+    }
+
+    const baseName = currentLoadedFileName
+      ? currentLoadedFileName.replace(/\.[^/.]+$/, "")
+      : "restored_document";
+    const ext = currentLoadedFileName && currentLoadedFileName.endsWith(".csv") ? "csv" : "txt";
+    downloadTextFile(outputEl.textContent, `${baseName}_RESTORED.${ext}`);
+  }
+
+  /**
+   * ==========================================================================
+   * CLIPBOARD COPY HANDLERS
+   * ==========================================================================
    */
   function copySanitizedText(btnElement) {
     const outputEl = document.getElementById("sanitized-output-text");
@@ -379,6 +756,7 @@ University of Fribourg (UniFR)`;
       sessionMap = {};
       sessionStorage.removeItem(SESSION_STORAGE_KEY);
       updateJsonPreview();
+      clearLoadedFile();
 
       const sanitizedBox = document.getElementById("sanitized-result-container");
       const restoredBox = document.getElementById("restored-result-container");
@@ -398,6 +776,7 @@ University of Fribourg (UniFR)`;
   function init() {
     loadSessionMap();
     updateJsonPreview();
+    setupDragAndDrop();
     if (window.lucide && typeof window.lucide.createIcons === "function") {
       window.lucide.createIcons();
     }
@@ -412,6 +791,10 @@ University of Fribourg (UniFR)`;
     loadSimulatedAiResponse,
     copySanitizedText,
     copyRestoredText,
+    downloadSanitizedFile,
+    downloadRestoredFile,
+    handleFileUpload,
+    clearLoadedFile,
     clearSession
   };
 })();
