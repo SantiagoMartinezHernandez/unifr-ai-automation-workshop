@@ -628,67 +628,331 @@ window.WorkshopViews = (function () {
           </div>
         </div>
 
-        <!-- The Swiss Safe Sandbox Card (nDSG / revFADP & NotebookLM SLA) -->
-        <div class="glass-card rounded-2xl p-6 sm:p-8 border-2 border-emerald-500/30 bg-gradient-to-br from-white via-white to-emerald-50/40">
+        <!-- ==================================================================
+             SWISS DATA PROTECTION (nDSG / revFADP) & DATA SOVEREIGNTY
+             ================================================================== -->
+        <div class="glass-card rounded-3xl p-6 sm:p-8 border-2 border-emerald-500/30 bg-gradient-to-br from-white via-white to-emerald-50/30 space-y-6">
           <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-6 border-b border-slate-200">
             <div class="flex items-start sm:items-center gap-4">
-              <div class="w-12 h-12 rounded-2xl bg-red-600 text-white font-display font-extrabold text-2xl flex items-center justify-center shadow-md shrink-0">
+              <div class="w-12 h-12 rounded-2xl bg-red-600 text-white font-display font-extrabold text-2xl flex items-center justify-center shadow-md shadow-red-600/30 shrink-0">
                 +
               </div>
               <div>
                 <div class="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-emerald-700 font-bold">
                   <i data-lucide="shield-check" class="w-4 h-4"></i>
-                  <span>The Swiss Safe Sandbox • Data Sovereignty & Privacy</span>
+                  <span>Swiss Data Protection (nDSG / revFADP)</span>
                 </div>
-                <h2 class="font-display font-bold text-xl sm:text-2xl text-slate-900">
-                  Swiss Data Protection (nDSG / revFADP) & Institutional Boundaries
+                <h2 class="font-display font-extrabold text-xl sm:text-2xl lg:text-3xl text-slate-900 tracking-tight">
+                  The Safe Sandbox: Knowing Where Your Data Lives
                 </h2>
+                <p class="text-xs sm:text-sm text-slate-600 mt-1">
+                  Understanding institutional boundaries vs. public consumer AI tiers under Swiss federal privacy laws.
+                </p>
               </div>
             </div>
-            <a
-              href="${cfg.links.notebookLM}"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-display font-semibold text-xs sm:text-sm shadow-sm transition-all shrink-0"
-            >
-              <i data-lucide="lock" class="w-4 h-4"></i>
-              <span>Open Safe Research Vault (NotebookLM)</span>
-              <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-            </a>
+
+            <div class="flex flex-wrap items-center gap-2.5 shrink-0">
+              <a
+                href="${cfg.links.anonymizerTool || './anonymizer.html'}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-display font-semibold text-xs sm:text-sm shadow-md shadow-indigo-600/20 transition-all shrink-0"
+              >
+                <i data-lucide="shield" class="w-4 h-4 text-emerald-300"></i>
+                <span>Open Safe PII Anonymizer Page</span>
+                <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-75"></i>
+              </a>
+              <a
+                href="${cfg.links.notebookLM}"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-display font-semibold text-xs sm:text-sm shadow-sm transition-all shrink-0"
+              >
+                <i data-lucide="lock" class="w-4 h-4"></i>
+                <span>Open Safe Research Vault (NotebookLM)</span>
+                <i data-lucide="external-link" class="w-3.5 h-3.5 opacity-75"></i>
+              </a>
+            </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-5 mt-6">
+          <!-- The Safe Sandbox: Platform Training & Privacy Policy Table -->
+          <div class="rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-sm">
+            <div class="px-5 py-3.5 bg-slate-50 border-b border-slate-200 flex items-center justify-between gap-2">
+              <div class="font-display font-bold text-sm text-slate-900 flex items-center gap-2">
+                <i data-lucide="table" class="w-4 h-4 text-indigo-600"></i>
+                <span>Platform Governance &amp; Training Policy Matrix</span>
+              </div>
+              <span class="text-[11px] font-mono text-slate-500 bg-white border border-slate-200 px-2.5 py-0.5 rounded-full">
+                Institutional vs Consumer Tiers
+              </span>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left border-collapse text-xs sm:text-sm font-sans">
+                <thead>
+                  <tr class="border-b border-slate-200 text-slate-500 font-display font-bold text-xs bg-slate-50/50">
+                    <th class="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Platform</th>
+                    <th class="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Access Tier</th>
+                    <th class="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Model Training Policy</th>
+                    <th class="py-3 px-4 font-semibold uppercase tracking-wider text-[11px]">Approved Workshop Use Case</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  <tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="py-3.5 px-4 font-display font-bold text-slate-900 flex items-center gap-2">
+                      <div class="w-7 h-7 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+                        <i data-lucide="mail" class="w-4 h-4"></i>
+                      </div>
+                      <span>M365 Copilot &amp; Power Automate</span>
+                    </td>
+                    <td class="py-3.5 px-4 text-slate-600">UniFR Enterprise License</td>
+                    <td class="py-3.5 px-4">
+                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-semibold text-xs border border-emerald-200">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        <span>Zero training (Tenant isolated)</span>
+                      </span>
+                    </td>
+                    <td class="py-3.5 px-4 text-slate-600">Internal emails, calendar, institutional workflows</td>
+                  </tr>
+
+                  <tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="py-3.5 px-4 font-display font-bold text-slate-900 flex items-center gap-2">
+                      <div class="w-7 h-7 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+                        <i data-lucide="book-open" class="w-4 h-4"></i>
+                      </div>
+                      <span>Google NotebookLM</span>
+                    </td>
+                    <td class="py-3.5 px-4 text-slate-600">Free Consumer Account</td>
+                    <td class="py-3.5 px-4">
+                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-semibold text-xs border border-emerald-200">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        <span>Zero training on uploaded sources</span>
+                      </span>
+                    </td>
+                    <td class="py-3.5 px-4 text-slate-600">Literature synthesis, Apps Script code generation</td>
+                  </tr>
+
+                  <tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="py-3.5 px-4 font-display font-bold text-slate-900 flex items-center gap-2">
+                      <div class="w-7 h-7 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center shrink-0">
+                        <i data-lucide="palette" class="w-4 h-4"></i>
+                      </div>
+                      <span>Adobe Express &amp; Firefly</span>
+                    </td>
+                    <td class="py-3.5 px-4 text-slate-600">UniFR Premium Access</td>
+                    <td class="py-3.5 px-4">
+                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 font-semibold text-xs border border-emerald-200">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                        <span>Commercially safe Stock training</span>
+                      </span>
+                    </td>
+                    <td class="py-3.5 px-4 text-slate-600">Automated certificates, visual academic assets</td>
+                  </tr>
+
+                  <tr class="bg-amber-50/60 hover:bg-amber-50 transition-colors">
+                    <td class="py-3.5 px-4 font-display font-bold text-amber-950 flex items-center gap-2">
+                      <div class="w-7 h-7 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                        <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                      </div>
+                      <span>Public Free Chatbots</span>
+                    </td>
+                    <td class="py-3.5 px-4 text-amber-900">Consumer Web Tier</td>
+                    <td class="py-3.5 px-4">
+                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 font-bold text-xs border border-amber-300">
+                        <span class="w-1.5 h-1.5 rounded-full bg-amber-600 animate-pulse"></span>
+                        <span>Trains on inputs by default</span>
+                      </span>
+                    </td>
+                    <td class="py-3.5 px-4 font-semibold text-amber-900">
+                      Anonymized logic only — never paste raw PII
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- 3 Institutional Pillars -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
             <!-- Pillar 1 -->
-            <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm space-y-2">
-              <div class="flex items-center gap-2 text-indigo-600 font-display font-bold text-base">
-                <i data-lucide="building-2" class="w-5 h-5"></i>
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-2">
+              <div class="flex items-center gap-2 text-indigo-600 font-display font-bold text-sm sm:text-base">
+                <i data-lucide="building-2" class="w-4 h-4 shrink-0"></i>
                 <span>1. M365 Swiss Tenant Boundaries</span>
               </div>
-              <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+              <p class="text-xs text-slate-600 leading-relaxed">
                 When signed into your <strong>@unifr.ch</strong> Microsoft 365 account (Outlook, SharePoint, OneDrive, Teams, M365 Copilot with Commercial Data Protection), your data stays governed by institutional tenant agreements and Swiss <strong>nDSG / revFADP</strong> compliance.
               </p>
             </div>
 
             <!-- Pillar 2 -->
-            <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm space-y-2">
-              <div class="flex items-center gap-2 text-amber-600 font-display font-bold text-base">
-                <i data-lucide="user-x" class="w-5 h-5"></i>
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm space-y-2">
+              <div class="flex items-center gap-2 text-amber-600 font-display font-bold text-sm sm:text-base">
+                <i data-lucide="user-x" class="w-4 h-4 shrink-0"></i>
                 <span>2. The Anonymization Golden Rule</span>
               </div>
-              <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                Before sending student evaluations, clinical notes, or unpublished peer reviews across an external bridge, strip PII (Names, Matriculation IDs, Grades). Pass <code>Student_ID_042</code> instead of real names when calling external APIs.
+              <p class="text-xs text-slate-600 leading-relaxed">
+                Before sending student evaluations, clinical notes, or unpublished peer reviews across an external bridge or free LLM, strip PII (Names, Matriculation IDs, Grades). Pass <code>[PERSON_1]</code> or <code>[STUDENT_ID_042]</code> instead of real names.
               </p>
             </div>
 
             <!-- Pillar 3 -->
-            <div class="bg-white rounded-xl p-5 border border-emerald-200 shadow-sm space-y-2">
-              <div class="flex items-center gap-2 text-emerald-700 font-display font-bold text-base">
-                <i data-lucide="book-lock" class="w-5 h-5"></i>
+            <div class="bg-white rounded-2xl p-5 border border-emerald-200 shadow-sm space-y-2">
+              <div class="flex items-center gap-2 text-emerald-700 font-display font-bold text-sm sm:text-base">
+                <i data-lucide="book-lock" class="w-4 h-4 shrink-0"></i>
                 <span>3. Google NotebookLM's Zero-Training SLA</span>
               </div>
-              <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
-                Why is <strong>Google NotebookLM</strong> the ultimate academic research vault? Under Google's NotebookLM SLA, your uploaded PDFs, grant drafts, and source documents are <strong>never used to train foundation models</strong> and remain strictly isolated to your private notebook.
+              <p class="text-xs text-slate-600 leading-relaxed">
+                Under Google's NotebookLM SLA, your uploaded PDFs, grant drafts, and source documents are <strong>never used to train foundation models</strong> and remain strictly isolated to your private notebook.
               </p>
+            </div>
+          </div>
+
+          <!-- Interactive Swiss-Safe PII Anonymizer Feature Card -->
+          <div class="rounded-2xl p-5 sm:p-6 bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 text-white border border-indigo-400/30 shadow-xl space-y-5">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-white/10">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                  <span class="text-xs font-mono uppercase tracking-wider text-emerald-300 font-bold">
+                    Interactive Workshop Tool • Row 4 Protection
+                  </span>
+                </div>
+                <h3 class="font-display font-bold text-lg sm:text-xl text-white">
+                  Swiss-Safe PII Anonymizer &amp; De-Masking Vault
+                </h3>
+                <p class="text-xs text-slate-300 max-w-2xl">
+                  Using free ChatGPT, Claude, or Gemini? Automatically detect and replace names, Swiss phone numbers, emails, and student IDs with reversible tags. The key map stays <strong>strictly in browser session memory</strong>. Paste the AI's response back to restore the original details.
+                </p>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-2 shrink-0">
+                <a
+                  href="${cfg.links.anonymizerTool || './anonymizer.html'}"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-display font-bold text-xs sm:text-sm shadow-md transition-all"
+                >
+                  <i data-lucide="external-link" class="w-4 h-4"></i>
+                  <span>Launch Dedicated Anonymizer Tab</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- In-Page Quick Test Console -->
+            <div class="space-y-4">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <span class="text-xs font-mono text-indigo-200">
+                  Quick Live Demo (Test right here on the projector):
+                </span>
+                <div class="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onclick="if (window.AnonymizerApp) window.AnonymizerApp.loadPreset('student')"
+                    class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-medium text-slate-200 cursor-pointer"
+                  >
+                    Load Student Sample
+                  </button>
+                  <button
+                    type="button"
+                    onclick="if (window.AnonymizerApp) window.AnonymizerApp.loadPreset('grant')"
+                    class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-white/20 text-xs font-medium text-slate-200 cursor-pointer"
+                  >
+                    Load Grant Sample
+                  </button>
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <!-- Step 1: Input & Mask -->
+                <div class="space-y-2 bg-slate-950/60 p-4 rounded-xl border border-white/10">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-mono font-bold text-indigo-300">1. Confidential Text (Browser Memory):</span>
+                    <button
+                      type="button"
+                      onclick="if (window.AnonymizerApp) window.AnonymizerApp.sanitizeText()"
+                      class="px-3 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-display font-bold text-xs shadow cursor-pointer inline-flex items-center gap-1"
+                    >
+                      <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+                      <span>Mask PII</span>
+                    </button>
+                  </div>
+                  <textarea
+                    id="raw-input-text"
+                    rows="4"
+                    placeholder="Type or paste confidential student inquiry, grade, or email..."
+                    class="w-full p-3 rounded-lg border border-slate-700 bg-slate-900 text-xs font-mono text-slate-100 focus:outline-none focus:border-indigo-400"
+                  ></textarea>
+
+                  <div id="sanitized-result-container" class="hidden space-y-2 pt-2 border-t border-white/10">
+                    <div class="flex items-center justify-between">
+                      <span class="text-[11px] font-mono text-emerald-400 font-bold">Sanitized (Send to ChatGPT):</span>
+                      <button
+                        type="button"
+                        onclick="if (window.AnonymizerApp) window.AnonymizerApp.copySanitizedText(this)"
+                        class="px-2.5 py-1 rounded-md bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-[11px] cursor-pointer inline-flex items-center gap-1"
+                      >
+                        <i data-lucide="copy" class="w-3 h-3"></i>
+                        <span class="copy-btn-label">Copy</span>
+                      </button>
+                    </div>
+                    <div
+                      id="sanitized-output-text"
+                      class="p-2.5 rounded-lg bg-slate-900 text-[11px] font-mono text-emerald-200 border border-slate-800 whitespace-pre-wrap max-h-36 overflow-y-auto select-all"
+                    ></div>
+                    <div id="detected-pills-list" class="flex flex-wrap gap-1"></div>
+                  </div>
+                </div>
+
+                <!-- Step 2: Response & Restore -->
+                <div class="space-y-2 bg-slate-950/60 p-4 rounded-xl border border-white/10">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-mono font-bold text-emerald-300">2. AI Response (with [TAGS]):</span>
+                    <div class="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        onclick="if (window.AnonymizerApp) window.AnonymizerApp.loadSimulatedAiResponse()"
+                        class="px-2 py-1 rounded-md bg-white/10 hover:bg-white/20 text-slate-300 text-[11px] cursor-pointer"
+                        title="Simulate ChatGPT output"
+                      >
+                        Simulate AI
+                      </button>
+                      <button
+                        type="button"
+                        onclick="if (window.AnonymizerApp) window.AnonymizerApp.restoreText()"
+                        class="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-display font-bold text-xs shadow cursor-pointer inline-flex items-center gap-1"
+                      >
+                        <i data-lucide="unlock" class="w-3.5 h-3.5"></i>
+                        <span>Restore</span>
+                      </button>
+                    </div>
+                  </div>
+                  <textarea
+                    id="ai-response-input"
+                    rows="4"
+                    placeholder="Paste AI response containing [PERSON_1], [STUDENT_ID_1]..."
+                    class="w-full p-3 rounded-lg border border-slate-700 bg-slate-900 text-xs font-mono text-slate-100 focus:outline-none focus:border-emerald-400"
+                  ></textarea>
+
+                  <div id="restored-result-container" class="hidden space-y-2 pt-2 border-t border-white/10">
+                    <div class="flex items-center justify-between">
+                      <span class="text-[11px] font-mono text-emerald-300 font-bold">Restored Original Details:</span>
+                      <button
+                        type="button"
+                        onclick="if (window.AnonymizerApp) window.AnonymizerApp.copyRestoredText(this)"
+                        class="px-2.5 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-white font-bold text-[11px] cursor-pointer inline-flex items-center gap-1 border border-slate-600"
+                      >
+                        <i data-lucide="copy" class="w-3 h-3"></i>
+                        <span class="copy-btn-label">Copy</span>
+                      </button>
+                    </div>
+                    <div
+                      id="restored-output-text"
+                      class="p-2.5 rounded-lg bg-slate-900 text-[11px] font-mono text-slate-100 border border-slate-800 whitespace-pre-wrap max-h-36 overflow-y-auto select-all"
+                    ></div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>

@@ -100,7 +100,18 @@
         <span class="sm:hidden">Schedule</span>
       </button>
 
-      <!-- 3. Projector / Lecture Mode Toggle (+20% Font Scale) -->
+      <!-- 3. Swiss-Safe PII Anonymizer Tool Pill -->
+      <a href="./anonymizer.html" target="_blank" rel="noopener noreferrer"
+        class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-50 hover:bg-emerald-100/80 text-emerald-900 border border-emerald-300 font-display font-semibold text-xs transition-all shadow-xs"
+        title="Open Swiss-Safe PII Anonymizer in a separate tab">
+        <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+        <i data-lucide="shield-check" class="w-3.5 h-3.5 text-emerald-600"></i>
+        <span class="hidden md:inline">Safe PII Anonymizer</span>
+        <span class="md:hidden">Anonymizer</span>
+        <i data-lucide="external-link" class="w-3 h-3 text-emerald-600 opacity-75"></i>
+      </a>
+
+      <!-- 4. Projector / Lecture Mode Toggle (+20% Font Scale) -->
       <button type="button" id="projector-mode-btn" onclick="window.WorkshopApp.toggleProjectorMode()"
         class="inline-flex items-center gap-2 px-3 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-display font-semibold text-xs transition-all cursor-pointer"
         title="Projector / Lecture Mode: Increases base font size by 20% and hides secondary clutter">
@@ -109,7 +120,7 @@
         <span id="projector-mode-status" class="font-mono text-[11px] font-bold">OFF</span>
       </button>
 
-      <!-- 4. Prominent GitHub / Portfolio Button (Connected to config.js links.githubProfile / githubRepo) -->
+      <!-- 5. Prominent GitHub / Portfolio Button (Connected to config.js links.githubProfile / githubRepo) -->
       <a id="top-github-btn" data-config-link="githubProfile" href="#" target="_blank" rel="noopener noreferrer"
         class="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-display font-semibold text-xs shadow-sm transition-all">
         <i data-lucide="github" class="w-3.5 h-3.5 text-amber-400"></i>
@@ -195,6 +206,7 @@
 
   <!-- Centralized Config + Modular Views + Main Controller -->
   <script src="./config.js"></script>
+  <script src="./anonymizer.js"></script>
   <script src="./views.js"></script>
   <script src="./app.js"></script>
 </body>

@@ -4,6 +4,7 @@ Interactive, gamified, 7-module web application designed for the 4-hour workshop
 
 ## ✨ Key Architectural Features
 - **Strict Single-View Switching (No Endless Scrolling):** Left collapsible sidebar swaps between the 7 modules (`#view-1` to `#view-7`) with hash routing for seamless GitHub Pages compatibility.
+- **Swiss-Safe PII Anonymizer & De-Masking Vault (`anonymizer.html`):** Standalone 100% client-side tool allowing researchers and faculty to safely mask names, student IDs, Swiss phone numbers, emails, and grant budgets before sending prompts to free LLMs, and restore the AI's response with a single click using a purely in-memory session key.
 - **Projector / Lecture Mode Toggle:** One click in the top bar increases base typography by `+20%` and hides secondary UI hints for 16:9 classroom projection.
 - **Centralized Configuration (`config.js`):** Update your GitHub URL, LinkedIn URL, Graduation Form URL, schedule blocks, and prompts in one file.
 - **One-Click Copy Prompt & GAS Code Cards:** Includes syntax highlighting, `ALL CAPS` edit indicators, emerald glow state (`Copied! Ready to Paste ✓`), and micro-confetti feedback.

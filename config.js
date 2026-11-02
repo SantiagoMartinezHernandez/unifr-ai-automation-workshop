@@ -28,6 +28,9 @@ window.WORKSHOP_CONFIG = {
     email: "mailto:andres.martinezhernandez@unifr.ch?subject=UniFR%20AI%20Automation%20Inquiry",
     consultancyCalendar: "https://calendly.com/santiago-m-art-inez/executive-meeting",
 
+    // Swiss-Safe PII Anonymizer & De-Masking Tool
+    anonymizerTool: "./anonymizer.html",
+
     // View 7: Graduation Form Link (Used for Live Button & Dynamic QR Code)
     graduationFormUrl: "https://forms.office.com/r/UNIFR-GRADUATION-DEMO",
 
@@ -496,8 +499,13 @@ Architecture Requirements:
       },
       {
         id: "chk-v1-2",
-        title: "Review the Swiss Safe Sandbox (nDSG / revFADP & NotebookLM SLA)",
-        detail: "Know how to anonymize sensitive student/research data and stay inside safe institutional boundaries."
+        title: "Review the Swiss Safe Sandbox & Data Storage Policy Matrix",
+        detail: "Inspect the 4 platform tiers (M365, NotebookLM, Adobe, Public LLMs) under Swiss nDSG/revFADP."
+      },
+      {
+        id: "chk-v1-3",
+        title: "Test the Swiss-Safe PII Anonymizer & De-Masking Vault",
+        detail: "Safely mask student/research PII before testing with free consumer chatbots and restore responses with one click."
       }
     ],
     "view-2": [
