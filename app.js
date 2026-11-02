@@ -435,6 +435,62 @@ window.WorkshopApp = (function () {
     modal.classList.toggle("hidden");
   }
 
+  // Handle Coffee Break 3D Modal
+  let coffeeResizeBound = false;
+  function handleCoffeeResize() {
+    if (window.Coffee3D && typeof window.Coffee3D.resize === "function") {
+      window.Coffee3D.resize();
+    }
+  }
+
+  function openCoffeeBreakModal(timeSlot, title, desc) {
+    const modal = document.getElementById("coffee-break-modal");
+    if (!modal) return;
+
+    const badgeEl = document.getElementById("coffee-break-badge");
+    const titleEl = document.getElementById("coffee-break-title");
+    const descEl = document.getElementById("coffee-break-desc");
+
+    if (badgeEl && timeSlot) {
+      badgeEl.textContent = `Official Workshop Break (${timeSlot})`;
+    }
+    if (titleEl && title) {
+      titleEl.textContent = title;
+    }
+    if (descEl && desc) {
+      descEl.textContent = desc;
+    }
+
+    modal.classList.remove("hidden");
+
+    // Initialize 3D scene after modal unhides so client dimensions are computed properly
+    setTimeout(() => {
+      const container = document.getElementById("threejs-coffee-container");
+      if (container && window.Coffee3D) {
+        window.Coffee3D.init(container);
+      }
+    }, 60);
+
+    if (!coffeeResizeBound) {
+      window.addEventListener("resize", handleCoffeeResize);
+      coffeeResizeBound = true;
+    }
+
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+      window.lucide.createIcons();
+    }
+  }
+
+  function closeCoffeeBreakModal() {
+    const modal = document.getElementById("coffee-break-modal");
+    if (!modal) return;
+    modal.classList.add("hidden");
+
+    if (window.Coffee3D && typeof window.Coffee3D.stop === "function") {
+      window.Coffee3D.stop();
+    }
+  }
+
   // Full Celebration Confetti (View 7 & Finale)
   function triggerCelebration() {
     if (typeof window.confetti !== "function") return;
@@ -495,27 +551,51 @@ window.WorkshopApp = (function () {
     const modalScheduleList = document.getElementById("modal-schedule-list");
     if (modalScheduleList) {
       modalScheduleList.innerHTML = cfg.schedule
-        .map(
-          (s) => `
-          <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-between gap-4">
+        .map((s) => {
+          const isBreak = s.type === "break";
+          const safeTitle = (s.title || "").replace(/'/g, "\\'");
+          const safeDesc = (s.description || "").replace(/'/g, "\\'");
+          return `
+          <div class="p-3.5 rounded-xl border ${
+            isBreak ? "border-amber-300 bg-amber-50/70" : "border-slate-200 bg-slate-50"
+          } flex items-center justify-between gap-4">
             <div class="space-y-0.5">
               <div class="flex items-center gap-2">
-                <i data-lucide="${s.icon || "clock"}" class="w-3.5 h-3.5 text-indigo-600"></i>
-                <span class="font-mono text-xs font-bold text-indigo-600">${s.time}</span>
+                <i data-lucide="${s.icon || "clock"}" class="w-3.5 h-3.5 ${
+            isBreak ? "text-amber-600" : "text-indigo-600"
+          }"></i>
+                <span class="font-mono text-xs font-bold ${
+                  isBreak ? "text-amber-700" : "text-indigo-600"
+                }">${s.time}</span>
+                ${
+                  isBreak
+                    ? `<span class="px-2 py-0.5 rounded-md text-[10px] font-mono font-bold bg-amber-200 text-amber-900 border border-amber-300">BREAK</span>`
+                    : ""
+                }
               </div>
               <div class="font-display font-bold text-sm text-slate-900">${s.title}</div>
               <p class="text-xs text-slate-500 mt-0.5">${s.description}</p>
             </div>
-            <button
-              type="button"
-              onclick="window.WorkshopApp.toggleScheduleModal(); window.WorkshopApp.switchView('${s.targetView}')"
-              class="px-3 py-1.5 rounded-lg bg-indigo-600 text-white font-display font-semibold text-xs shrink-0 cursor-pointer"
-            >
-              Open
-            </button>
+            ${
+              isBreak
+                ? `<button
+                    type="button"
+                    onclick="window.WorkshopApp.toggleScheduleModal(); window.WorkshopApp.openCoffeeBreakModal('${s.time}', '${safeTitle}', '${safeDesc}')"
+                    class="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-display font-bold text-xs shrink-0 cursor-pointer flex items-center gap-1.5 shadow-sm"
+                  >
+                    <span>☕ Break 3D</span>
+                  </button>`
+                : `<button
+                    type="button"
+                    onclick="window.WorkshopApp.toggleScheduleModal(); window.WorkshopApp.switchView('${s.targetView}')"
+                    class="px-3 py-1.5 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white font-display font-semibold text-xs shrink-0 cursor-pointer"
+                  >
+                    Open
+                  </button>`
+            }
           </div>
-        `
-        )
+        `;
+        })
         .join("");
     }
   }
@@ -556,6 +636,8 @@ window.WorkshopApp = (function () {
     toggleSidebarCollapse,
     toggleMobileSidebar,
     toggleScheduleModal,
+    openCoffeeBreakModal,
+    closeCoffeeBreakModal,
     triggerCelebration
   };
 })();

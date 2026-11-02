@@ -224,9 +224,83 @@ window.WorkshopViews = (function () {
     `;
   }
 
+  // Helper: Visual Break Stop Callout with 3D Coffee Trigger
+  function renderCoffeeBreakCallout(timeSlot, title, description, badgeText) {
+    const safeTime = escapeHtml(timeSlot);
+    const safeTitle = escapeHtml(title);
+    const safeDesc = escapeHtml(description);
+    const safeBadge = escapeHtml(badgeText || "Workshop Break Milestone");
+
+    return `
+      <div class="mt-10 mb-6 p-6 sm:p-7 rounded-3xl bg-gradient-to-br from-amber-500/15 via-orange-500/10 to-amber-600/20 border-2 border-amber-300 shadow-xl shadow-amber-500/5 relative overflow-hidden">
+        <!-- Ambient decorative shapes -->
+        <div class="absolute -right-8 -top-8 w-36 h-36 rounded-full bg-amber-400/20 blur-2xl pointer-events-none"></div>
+        <div class="absolute -left-8 -bottom-8 w-36 h-36 rounded-full bg-orange-400/20 blur-2xl pointer-events-none"></div>
+
+        <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div class="flex items-start gap-4">
+            <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-600 to-amber-400 text-white flex items-center justify-center text-3xl shadow-lg shadow-amber-500/30 shrink-0">
+              ☕
+            </div>
+            <div class="space-y-1.5">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-200/90 text-amber-950 border border-amber-300">
+                  <span class="w-2 h-2 rounded-full bg-amber-600 animate-ping"></span>
+                  ${safeTime}
+                </span>
+                <span class="text-xs font-bold uppercase tracking-wider text-amber-800 font-mono">
+                  ${safeBadge}
+                </span>
+              </div>
+              <h3 class="font-display font-extrabold text-xl text-slate-900 tracking-tight">
+                ${safeTitle} 🥐
+              </h3>
+              <p class="text-xs sm:text-sm text-slate-700 leading-relaxed max-w-xl">
+                ${safeDesc}
+              </p>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onclick="window.WorkshopApp.openCoffeeBreakModal('${safeTime}', '${safeTitle}', '${safeDesc}')"
+            class="w-full md:w-auto inline-flex items-center justify-center gap-3 px-6 py-3.5 rounded-2xl bg-gradient-to-r from-amber-500 via-amber-600 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-display font-extrabold text-sm shadow-lg shadow-amber-500/30 hover:shadow-xl hover:shadow-amber-500/40 hover:-translate-y-0.5 active:translate-y-0 transition-all cursor-pointer shrink-0 group"
+          >
+            <span class="text-xl group-hover:scale-110 transition-transform">🥐</span>
+            <span>Launch Coffee Break (3D)</span>
+            <span class="px-2 py-0.5 rounded-md bg-black/20 text-[11px] font-mono tracking-wider">Three.js</span>
+          </button>
+        </div>
+      </div>
+    `;
+  }
+
   function renderViewPagination(currentIndex) {
     const prevMod = currentIndex > 0 ? cfg.modules[currentIndex - 1] : null;
     const nextMod = currentIndex < cfg.modules.length - 1 ? cfg.modules[currentIndex + 1] : null;
+
+    let breakBtnHtml = "";
+    if (currentIndex === 1) {
+      breakBtnHtml = `
+        <button
+          type="button"
+          onclick="window.WorkshopApp.openCoffeeBreakModal('09:30 – 09:50', 'Coffee, Croissants &amp; Bottleneck Board', 'Step away from the screen, grab an espresso, and add your biggest weekly bottleneck sticky note to the board.')"
+          class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 font-display font-bold text-xs sm:text-sm shadow-xs transition-all cursor-pointer hover:-translate-y-0.5"
+        >
+          <span>☕ Coffee Time (09:30 – 09:50) 🥐</span>
+        </button>
+      `;
+    } else if (currentIndex === 4) {
+      breakBtnHtml = `
+        <button
+          type="button"
+          onclick="window.WorkshopApp.openCoffeeBreakModal('10:50 – 11:05', 'Espresso Refill &amp; Self-Healing Debugging Lounge', 'Grab an espresso, compare formulas with colleagues, and test error-handling in your Apps Script logs.')"
+          class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 font-display font-bold text-xs sm:text-sm shadow-xs transition-all cursor-pointer hover:-translate-y-0.5"
+        >
+          <span>🥐 Coffee Time (10:50 – 11:05) ☕</span>
+        </button>
+      `;
+    }
 
     return `
       <div class="mt-8 pt-6 border-t border-slate-200/80 flex flex-wrap items-center justify-between gap-4">
@@ -242,25 +316,28 @@ window.WorkshopViews = (function () {
               </button>`
             : `<div></div>`
         }
-        ${
-          nextMod
-            ? `<button
-                type="button"
-                onclick="window.WorkshopApp.switchView('${nextMod.id}')"
-                class="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-display font-semibold text-sm shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
-              >
-                <span>Next Module: ${escapeHtml(nextMod.number)}. ${escapeHtml(nextMod.shortTitle)}</span>
-                <i data-lucide="arrow-right" class="w-4 h-4"></i>
-              </button>`
-            : `<button
-                type="button"
-                onclick="window.WorkshopApp.triggerCelebration()"
-                class="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-display font-semibold text-sm shadow-md shadow-emerald-600/20 transition-all cursor-pointer"
-              >
-                <i data-lucide="party-popper" class="w-4 h-4"></i>
-                <span>Celebrate Workshop Completion!</span>
-              </button>`
-        }
+        <div class="flex flex-wrap items-center gap-3">
+          ${breakBtnHtml}
+          ${
+            nextMod
+              ? `<button
+                  type="button"
+                  onclick="window.WorkshopApp.switchView('${nextMod.id}')"
+                  class="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-display font-semibold text-sm shadow-md shadow-indigo-600/20 transition-all cursor-pointer"
+                >
+                  <span>Next Module: ${escapeHtml(nextMod.number)}. ${escapeHtml(nextMod.shortTitle)}</span>
+                  <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>`
+              : `<button
+                  type="button"
+                  onclick="window.WorkshopApp.triggerCelebration()"
+                  class="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-display font-semibold text-sm shadow-md shadow-emerald-600/20 transition-all cursor-pointer"
+                >
+                  <i data-lucide="party-popper" class="w-4 h-4"></i>
+                  <span>Celebrate Workshop Completion!</span>
+                </button>`
+          }
+        </div>
       </div>
     `;
   }
@@ -1063,6 +1140,14 @@ window.WorkshopViews = (function () {
           ${renderPromptCard(cfg.prompts.selfHealingDebugger)}
         </div>
 
+        <!-- Break Stop Indicator (Before 09:30 Break) -->
+        ${renderCoffeeBreakCallout(
+          "09:30 – 09:50",
+          "Coffee, Croissants & Bottleneck Board",
+          "Section 02 complete! Grab a fresh hot espresso and a croissant at the coffee station. Post your biggest weekly repetitive time-sink on the Bottleneck Board before we dive into Microsoft Power Automate.",
+          "Official Break Milestone 1"
+        )}
+
         ${renderModuleChecklist("view-2")}
         ${renderViewPagination(1)}
       </section>
@@ -1645,6 +1730,14 @@ window.WorkshopViews = (function () {
 
         <!-- Complete Copy-Pasteable Code.gs Starter Script -->
         ${renderPromptCard(cfg.prompts.completeBridgeScript, "Copy Complete Script (Code.gs)")}
+
+        <!-- Break Stop Indicator (Before 10:50 Break) -->
+        ${renderCoffeeBreakCallout(
+          "10:50 – 11:05",
+          "Espresso Refill & Self-Healing Debugging Lounge",
+          "Section 05 complete! Grab an espresso, compare formulas with colleagues, and test error-handling in your Apps Script logs before we dive into Creative AI, Vibe-Coding, and Automated Graduation.",
+          "Official Break Milestone 2"
+        )}
 
         ${renderModuleChecklist("view-5")}
         ${renderViewPagination(4)}
