@@ -491,6 +491,94 @@ window.WorkshopApp = (function () {
     }
   }
 
+  // Power Automate Ghost Pop-up Modal (View 3)
+  function openGhostModal(ghostId) {
+    const modal = document.getElementById("ghost-modal");
+    if (!modal) return;
+
+    const iconEl = document.getElementById("ghost-modal-icon");
+    const badgeEl = document.getElementById("ghost-modal-badge");
+    const titleEl = document.getElementById("ghost-modal-title");
+    const bodyEl = document.getElementById("ghost-modal-body");
+
+    if (ghostId === "429") {
+      if (iconEl) iconEl.textContent = "🚦";
+      if (badgeEl) badgeEl.textContent = "Pro-Consultant Tip • Ghost #1";
+      if (titleEl) titleEl.textContent = "429 Rate Limit & Concurrency Lesson";
+      if (bodyEl) {
+        bodyEl.innerHTML = `
+          <div class="p-3.5 rounded-xl bg-amber-50 border border-amber-200 text-amber-950 text-xs sm:text-sm">
+            <strong>Why it happens:</strong> Shared multi-tenant Google Sheets connectors in Power Automate throttle bursts of requests and throw <code>Status Code 429 (Too Many Requests)</code> when scanning or appending to default <strong>1,000-row sheets</strong> in parallel.
+          </div>
+          <div class="space-y-2.5">
+            <div class="font-display font-bold text-slate-900 text-sm">The Two-Step Fix:</div>
+            <ol class="list-decimal list-inside space-y-2 text-xs sm:text-sm text-slate-700">
+              <li><strong>Delete unused empty rows</strong> in Google Sheets (select <strong>Rows 2–1000</strong> → Right-click → <em>Delete rows</em>).</li>
+              <li><strong>Turn Concurrency Control to <code>On</code></strong> (set <strong>Degree of Parallelism = 1</strong>) in your Power Automate trigger <strong>Settings (⚙️)</strong>.</li>
+            </ol>
+            <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-950 text-xs sm:text-sm">
+              <strong>⚡ Alternative Bypass:</strong> Use the <code>[FORM-BRIDGE]</code> email relay pattern (Power Automate sends a structured email to Gmail → Apps Script parses it) for instant <strong>0.4-second execution</strong> with zero Sheets connector throttling!
+            </div>
+          </div>
+        `;
+      }
+    } else if (ghostId === "fx") {
+      if (iconEl) iconEl.textContent = "fx";
+      if (badgeEl) badgeEl.textContent = "Expression Builder Warning • Ghost #2";
+      if (titleEl) titleEl.textContent = "The fx Expression Builder Trap";
+      if (bodyEl) {
+        bodyEl.innerHTML = `
+          <div class="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-950 text-xs sm:text-sm">
+            <strong>⚠️ Never paste <code>trim(split(...))</code> as plain text!</strong> If you type or paste an expression directly into an action's text box, Power Automate treats it as literal characters and sends the raw string <code>"trim(split(...))"</code> to your recipient.
+          </div>
+          <div class="space-y-2.5">
+            <div class="font-display font-bold text-slate-900 text-sm">Always Do This Instead:</div>
+            <ol class="list-decimal list-inside space-y-2 text-xs sm:text-sm text-slate-700">
+              <li>Click inside the input field and click the <strong><code>fx</code> (Insert Expression)</strong> icon.</li>
+              <li>Paste your formula (e.g., <code>trim(split(triggerOutputs()?['body/subject'], '|')[1])</code>) into the <strong>Expression</strong> tab.</li>
+              <li>Click <strong>Add / OK</strong> and verify it renders as a <strong>colored dynamic pill</strong> before saving!</li>
+            </ol>
+          </div>
+        `;
+      }
+    }
+
+    modal.classList.remove("hidden");
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+      window.lucide.createIcons();
+    }
+  }
+
+  function closeGhostModal() {
+    const modal = document.getElementById("ghost-modal");
+    if (!modal) return;
+    modal.classList.add("hidden");
+  }
+
+  // View 7 Two-Tab Return Bridge Architecture Switcher
+  function switchReturnBridgeTab(tabId) {
+    const tabs = ["tab-relay", "tab-batch"];
+    tabs.forEach((t) => {
+      const panel = document.getElementById(`panel-${t}`);
+      const btn = document.getElementById(`btn-${t}`);
+      if (panel) {
+        panel.classList.toggle("hidden", t !== tabId);
+      }
+      if (btn) {
+        if (t === tabId) {
+          btn.classList.add("bg-indigo-50/90", "border-indigo-600", "shadow-md");
+          btn.classList.remove("bg-slate-50", "border-slate-200");
+        } else {
+          btn.classList.remove("bg-indigo-50/90", "border-indigo-600", "shadow-md");
+          btn.classList.add("bg-slate-50", "border-slate-200");
+        }
+      }
+    });
+    if (window.lucide && typeof window.lucide.createIcons === "function") {
+      window.lucide.createIcons();
+    }
+  }
+
   // Full Celebration Confetti (View 7 & Finale)
   function triggerCelebration() {
     if (typeof window.confetti !== "function") return;
@@ -638,6 +726,9 @@ window.WorkshopApp = (function () {
     toggleScheduleModal,
     openCoffeeBreakModal,
     closeCoffeeBreakModal,
+    openGhostModal,
+    closeGhostModal,
+    switchReturnBridgeTab,
     triggerCelebration
   };
 })();

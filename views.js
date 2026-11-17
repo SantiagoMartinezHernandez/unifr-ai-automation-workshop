@@ -1341,6 +1341,105 @@ window.WorkshopViews = (function () {
           </div>
         </div>
 
+        <!-- Power Automate Ghosts & Gotchas (429 Concurrency + fx Expression Warning) -->
+        <div class="glass-card rounded-2xl p-6 sm:p-8 border border-amber-300/80 bg-gradient-to-br from-amber-50/40 via-white to-rose-50/30 space-y-6">
+          <div class="flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <span class="text-xs font-mono uppercase tracking-wider text-amber-700 font-bold">👻 Field-Tested Production Gotchas</span>
+              <h2 class="font-display font-bold text-xl sm:text-2xl text-slate-900">
+                Power Automate Ghosts &amp; How to Banish Them
+              </h2>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onclick="window.WorkshopApp.openGhostModal('429')"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 font-display font-bold text-xs cursor-pointer transition-all"
+              >
+                <span>👻</span>
+                <span>429 Ghost Pop-up</span>
+              </button>
+              <button
+                type="button"
+                onclick="window.WorkshopApp.openGhostModal('fx')"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-950 border border-rose-300 font-display font-bold text-xs cursor-pointer transition-all"
+              >
+                <span>👻</span>
+                <span>fx Warning Pop-up</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <!-- Ghost A: 429 Rate Limit & Concurrency Lesson -->
+            <div class="p-5 rounded-2xl bg-white border-2 border-amber-300 shadow-xs flex flex-col justify-between space-y-4">
+              <div class="space-y-3">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 border border-amber-300 text-[11px] font-mono font-bold uppercase">
+                    💡 Pro-Consultant Tip
+                  </span>
+                  <span class="text-xs font-mono font-bold text-rose-600">HTTP 429</span>
+                </div>
+                <h3 class="font-display font-extrabold text-lg text-slate-900">
+                  429 Rate Limit &amp; Concurrency Lesson
+                </h3>
+                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  Shared multi-tenant Google Sheets connectors throw <strong>Status Code 429 (Too Many Requests)</strong> when scanning or appending to default <strong>1,000-row sheets</strong> in parallel.
+                </p>
+                <div class="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200 space-y-2 text-xs text-slate-800">
+                  <div class="font-display font-bold text-amber-950">Two-Step Fix:</div>
+                  <ol class="list-decimal list-inside space-y-1.5">
+                    <li><strong>Delete unused empty rows</strong> in Google Sheets (<strong>Rows 2–1000</strong>).</li>
+                    <li>Turn <strong>Concurrency Control → On</strong> (<strong>Degree of Parallelism = 1</strong>) in the Power Automate trigger settings—or use the <code>[FORM-BRIDGE]</code> email pattern for instant <strong>0.4-second</strong> execution.</li>
+                  </ol>
+                </div>
+              </div>
+              <button
+                type="button"
+                onclick="window.WorkshopApp.openGhostModal('429')"
+                class="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-display font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-2"
+              >
+                <span>👻 Inspect 429 Ghost Pop-up</span>
+              </button>
+            </div>
+
+            <!-- Ghost B: The fx Expression Builder Warning -->
+            <div class="p-5 rounded-2xl bg-white border-2 border-rose-300 shadow-xs flex flex-col justify-between space-y-4">
+              <div class="space-y-3">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-rose-100 text-rose-900 border border-rose-300 text-[11px] font-mono font-bold uppercase">
+                    ⚠️ Visual Warning
+                  </span>
+                  <span class="px-2 py-0.5 rounded bg-indigo-600 text-white font-mono italic font-bold text-xs">fx</span>
+                </div>
+                <h3 class="font-display font-extrabold text-lg text-slate-900">
+                  The <code class="text-indigo-700">fx</code> Expression Builder Warning
+                </h3>
+                <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                  <strong>Never</strong> paste <code>trim(split(...))</code> as plain text into an input box! If you do, Power Automate treats it as literal characters instead of running the formula.
+                </p>
+                <div class="p-3.5 rounded-xl bg-slate-900 text-white font-mono text-xs space-y-2">
+                  <div class="flex items-center justify-between text-[11px]">
+                    <span class="text-rose-400">✗ Plain Text:</span>
+                    <span class="bg-slate-800 px-2 py-0.5 rounded text-slate-300">trim(split(...))</span>
+                  </div>
+                  <div class="flex items-center justify-between text-[11px]">
+                    <span class="text-emerald-400">✓ Click fx Icon First:</span>
+                    <span class="bg-indigo-600 px-2 py-0.5 rounded-full text-white font-bold">fx trim(split(...))</span>
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                onclick="window.WorkshopApp.openGhostModal('fx')"
+                class="w-full py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-display font-bold text-xs transition-all cursor-pointer flex items-center justify-center gap-2"
+              >
+                <span>👻 Inspect fx Warning Pop-up</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         ${renderModuleChecklist("view-3")}
         ${renderViewPagination(2)}
       </section>
@@ -1731,6 +1830,77 @@ window.WorkshopViews = (function () {
         <!-- Complete Copy-Pasteable Code.gs Starter Script -->
         ${renderPromptCard(cfg.prompts.completeBridgeScript, "Copy Complete Script (Code.gs)")}
 
+        <!-- NEW SECTION: Two-Way Bridge (Outlook <-> Gmail <-> Sheets <-> Gemini) -->
+        <div class="glass-card rounded-2xl p-6 sm:p-8 border-2 border-indigo-200 bg-gradient-to-br from-indigo-50/40 via-white to-emerald-50/30 space-y-6">
+          <div class="flex flex-wrap items-start justify-between gap-4">
+            <div class="space-y-1.5 max-w-3xl">
+              <span class="inline-flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-indigo-600 font-bold">
+                <i data-lucide="repeat" class="w-3.5 h-3.5"></i>
+                <span>Going Two-Way • Zero Inbox Clutter</span>
+              </span>
+              <h2 class="font-display font-extrabold text-xl sm:text-2xl text-slate-900">
+                🔄 The Two-Way Bridge: Outlook Folders ↔ Gmail Labels ↔ Gemini
+              </h2>
+              <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+                Your Spreadsheet Bridge doesn't just stop at Google Sheets! By pairing <strong>Gmail custom labels + auto-deletion</strong> in Google Apps Script with <strong>Outlook Rules + dedicated sub-folders</strong> (<code>Automation_Queue</code>) in Power Automate, you get a complete round-trip AI email assistant that sends replies from your official <code>@unifr.ch</code> address.
+              </p>
+            </div>
+            <span class="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-mono text-xs font-bold shrink-0">
+              Simplified Email Answering Pattern
+            </span>
+          </div>
+
+          <!-- 2-Leg Visual Pipeline -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+            <!-- Outbound Leg -->
+            <div class="p-5 rounded-2xl bg-white border border-slate-200 space-y-3">
+              <div class="flex items-center gap-2 pb-2 border-b border-slate-100">
+                <span class="w-6 h-6 rounded-lg bg-indigo-600 text-white font-mono text-xs font-bold flex items-center justify-center">→</span>
+                <h3 class="font-display font-bold text-sm text-slate-900">Leg 1: Outlook → Gmail → Sheet → Gemini</h3>
+              </div>
+              <ol class="space-y-2 text-xs text-slate-700">
+                <li class="flex items-start gap-2">
+                  <span class="font-mono font-bold text-indigo-600 shrink-0">01.</span>
+                  <span><strong>New Mail (Outlook)</strong> → Power Automate extracts sender, subject &amp; body and forwards <code>[AI-RELAY]</code> to Gmail.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="font-mono font-bold text-indigo-600 shrink-0">02.</span>
+                  <span><strong>Gmail Auto-Detect + Cleanup (G.A.S.)</strong> → Apps Script detects <code>[AI-RELAY]</code>, applies custom label <code>AI-Processed</code>, and <strong>moves the relay to Trash</strong>.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="font-mono font-bold text-indigo-600 shrink-0">03.</span>
+                  <span><strong>Safe Spreadsheet + Gemini (G.A.S.)</strong> → Stores the email in Google Sheets, calls <strong>Gemini API</strong> for a draft reply, and updates the Sheet row.</span>
+                </li>
+              </ol>
+            </div>
+
+            <!-- Return Leg -->
+            <div class="p-5 rounded-2xl bg-white border border-emerald-200 space-y-3">
+              <div class="flex items-center gap-2 pb-2 border-b border-emerald-100">
+                <span class="w-6 h-6 rounded-lg bg-emerald-600 text-white font-mono text-xs font-bold flex items-center justify-center">←</span>
+                <h3 class="font-display font-bold text-sm text-emerald-950">Leg 2: G.A.S. → Outlook Folder → PA → Final User</h3>
+              </div>
+              <ol class="space-y-2 text-xs text-slate-700">
+                <li class="flex items-start gap-2">
+                  <span class="font-mono font-bold text-emerald-600 shrink-0">04.</span>
+                  <span><strong>Send Return Trigger (G.A.S.)</strong> → Apps Script emails <code>[AI-RETURN] | recipient | subject</code> back to your <code>@unifr.ch</code> Outlook.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="font-mono font-bold text-emerald-600 shrink-0">05.</span>
+                  <span><strong>Outlook Rule → Sub-Folder</strong> → An Outlook Rule catches <code>[AI-RETURN]</code> and keeps it in a clean <code>Automation_Queue</code> folder.</span>
+                </li>
+                <li class="flex items-start gap-2">
+                  <span class="font-mono font-bold text-emerald-600 shrink-0">06.</span>
+                  <span><strong>PA Flow #2: Delete &amp; Re-Send</strong> → Triggers on new mail in <code>Automation_Queue</code>, <strong>deletes the relay</strong>, and sends the AI-based response to the final user!</span>
+                </li>
+              </ol>
+            </div>
+          </div>
+
+          <!-- Simplified Code.gs Example -->
+          ${renderPromptCard(cfg.prompts.twoWayEmailBridgeScript, "Copy Simplified Two-Way Code.gs")}
+        </div>
+
         <!-- Break Stop Indicator (Before 10:50 Break) -->
         ${renderCoffeeBreakCallout(
           "10:50 – 11:05",
@@ -2027,6 +2197,118 @@ window.WorkshopViews = (function () {
               <div>
                 <div class="font-display font-bold text-sm text-emerald-950">Real-Time Inbox Delivery</div>
                 <p class="text-xs text-emerald-800 mt-0.5">Arrives in your inbox within 60 seconds—ready to share on LinkedIn!</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Two-Tab Return Bridge Architecture Switcher (Google -> UniFR Outlook) -->
+        <div class="glass-card rounded-2xl p-6 sm:p-8 border border-slate-200 space-y-5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <span class="text-xs font-mono uppercase tracking-wider text-indigo-600 font-bold">Return Bridge Architecture</span>
+              <h2 class="font-display font-bold text-xl sm:text-2xl text-slate-900">
+                Two Ways to Return Data from Google Back to UniFR Outlook
+              </h2>
+            </div>
+            <span class="text-xs font-mono text-slate-500 bg-slate-100 px-3 py-1 rounded-full">
+              Click Tab A or Tab B to compare
+            </span>
+          </div>
+
+          <!-- Tab Buttons -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <button
+              type="button"
+              id="btn-tab-relay"
+              onclick="window.WorkshopApp.switchReturnBridgeTab('tab-relay')"
+              class="text-left p-4 rounded-xl border-2 bg-indigo-50/90 border-indigo-600 shadow-md transition-all cursor-pointer"
+            >
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs font-mono font-bold uppercase text-indigo-600">Tab A • Live Today</span>
+                <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-mono font-bold">⚡ Instant (0.4s)</span>
+              </div>
+              <div class="font-display font-bold text-base text-slate-900">The Sub-Folder Email Relay</div>
+              <p class="text-xs text-slate-600 mt-1">Event-driven return via <code>[GRAD-RELAY]</code> + Outlook <code>Automation_Queue</code> rule.</p>
+            </button>
+
+            <button
+              type="button"
+              id="btn-tab-batch"
+              onclick="window.WorkshopApp.switchReturnBridgeTab('tab-batch')"
+              class="text-left p-4 rounded-xl border-2 bg-slate-50 border-slate-200 hover:bg-slate-100 transition-all cursor-pointer"
+            >
+              <div class="flex items-center justify-between mb-1">
+                <span class="text-xs font-mono font-bold uppercase text-slate-500">Tab B • Enterprise Alternative</span>
+                <span class="px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 text-[10px] font-mono font-bold">⏱️ 15-Min Batch</span>
+              </div>
+              <div class="font-display font-bold text-base text-slate-900">Scheduled Batch &amp; Manual Button</div>
+              <p class="text-xs text-slate-600 mt-1">Drive PDF storage + <code>PENDING → DISPATCHED</code> status ledger in Google Sheets.</p>
+            </button>
+          </div>
+
+          <!-- Tab A Panel: Live Today — The Sub-Folder Email Relay -->
+          <div id="panel-tab-relay" class="p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-indigo-50/60 to-white border border-indigo-200 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500 text-white text-xs font-mono font-bold">
+                ⚡ Running Live Today
+              </span>
+              <span class="text-xs font-mono text-indigo-700">Zero Drive polling • Zero 429 limits</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div class="p-3.5 rounded-xl bg-white border border-indigo-200 space-y-1">
+                <div class="text-[11px] font-mono font-bold text-indigo-600">STEP 1 • G.A.S.</div>
+                <div class="font-display font-bold text-sm text-slate-900">Google Apps Script</div>
+                <p class="text-xs text-slate-600">Sends structured relay: <code>[GRAD-RELAY] | email | name</code></p>
+              </div>
+              <div class="p-3.5 rounded-xl bg-white border border-indigo-200 space-y-1">
+                <div class="text-[11px] font-mono font-bold text-indigo-600">STEP 2 • OUTLOOK</div>
+                <div class="font-display font-bold text-sm text-slate-900">Outlook Inbox Rule</div>
+                <p class="text-xs text-slate-600">Catches <code>[GRAD-RELAY]</code> &amp; moves it to <code>Automation_Queue</code> folder.</p>
+              </div>
+              <div class="p-3.5 rounded-xl bg-white border border-indigo-200 space-y-1">
+                <div class="text-[11px] font-mono font-bold text-indigo-600">STEP 3 • PA FLOW #2</div>
+                <div class="font-display font-bold text-sm text-slate-900">Extract via <code class="text-indigo-700">fx</code></div>
+                <p class="text-xs text-slate-600">Parses <code>email</code> &amp; <code>name</code> with <code>fx trim(split(...))</code>.</p>
+              </div>
+              <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-300 space-y-1">
+                <div class="text-[11px] font-mono font-bold text-emerald-700">STEP 4 • DISPATCH</div>
+                <div class="font-display font-bold text-sm text-emerald-950">Send &amp; Delete Relay</div>
+                <p class="text-xs text-emerald-800">Sends official <code>@unifr.ch</code> email &amp; deletes the relay message.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab B Panel: Enterprise Alternative — Scheduled Batch & Button -->
+          <div id="panel-tab-batch" class="hidden p-5 sm:p-6 rounded-2xl bg-gradient-to-br from-slate-50 to-white border border-slate-200 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800 text-white text-xs font-mono font-bold">
+                🏢 Enterprise Batch Pattern
+              </span>
+              <span class="text-xs font-mono text-slate-600">Ideal for controlled scheduled dispatches &amp; audit trails</span>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+              <div class="p-3.5 rounded-xl bg-white border border-slate-200 space-y-1">
+                <div class="text-[11px] font-mono font-bold text-indigo-600">STEP 1 • G.A.S.</div>
+                <div class="font-display font-bold text-sm text-slate-900">Save PDF &amp; Log PENDING</div>
+                <p class="text-xs text-slate-600">Saves PDF to Google Drive &amp; logs <code>PENDING</code> + <code>Drive_File_ID</code> in the <code>Completed</code> tab.</p>
+              </div>
+              <div class="p-3.5 rounded-xl bg-white border border-slate-200 space-y-1">
+                <div class="text-[11px] font-mono font-bold text-indigo-600">STEP 2 • PA FLOW #2</div>
+                <div class="font-display font-bold text-sm text-slate-900">15-Min Timer / Button</div>
+                <p class="text-xs text-slate-600">Runs on a <strong>15-min Recurrence Timer</strong> or an instructor <strong>Manual Button</strong> trigger.</p>
+              </div>
+              <div class="p-3.5 rounded-xl bg-white border border-slate-200 space-y-1">
+                <div class="text-[11px] font-mono font-bold text-indigo-600">STEP 3 • FETCH FILE</div>
+                <div class="font-display font-bold text-sm text-slate-900">Fetch by <code>Drive_File_ID</code></div>
+                <p class="text-xs text-slate-600">Pulls the exact generated PDF attachment from Google Drive for every <code>PENDING</code> row.</p>
+              </div>
+              <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-300 space-y-1">
+                <div class="text-[11px] font-mono font-bold text-emerald-700">STEP 4 • LEDGER</div>
+                <div class="font-display font-bold text-sm text-emerald-950">Update to <code>DISPATCHED</code></div>
+                <p class="text-xs text-emerald-800">Sends official email &amp; updates the Sheet status from <code>PENDING</code> to <code>DISPATCHED</code>.</p>
               </div>
             </div>
           </div>

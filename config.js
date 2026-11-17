@@ -32,7 +32,7 @@ window.WORKSHOP_CONFIG = {
     anonymizerTool: "./anonymizer.html",
 
     // View 7: Graduation Form Link (Used for Live Button & Dynamic QR Code)
-    graduationFormUrl: "https://forms.office.com/r/UNIFR-GRADUATION-DEMO",
+    graduationFormUrl: "https://forms.cloud.microsoft/e/3SeWg2G3mi",
 
     // Quick-Launch Platform Tools
     m365Copilot: "https://copilot.microsoft.com",
@@ -385,6 +385,83 @@ function setupTimeDrivenTrigger() {
     .create();
 
   SpreadsheetApp.getUi().alert("✅ Auto-Pilot Activated! Your Sheet will now check for new rows every 5 minutes.");
+}`
+    },
+
+    // View 5 Simplified Two-Way Email Answering Bridge (Outlook <-> Gmail <-> Sheets <-> Gemini)
+    twoWayEmailBridgeScript: {
+      id: "code-two-way-email-bridge",
+      badge: "Two-Way Bridge • Code.gs",
+      badgeColor: "indigo",
+      title: "Simplified Two-Way Email Answering Bridge (Gmail ↔ Sheets ↔ Gemini ↔ Outlook)",
+      subtitle: "Auto-detects [AI-RELAY] emails in Gmail, deletes/labels them, logs to Sheets, drafts an AI reply via Gemini, and relays [AI-RETURN] back to your Outlook Automation_Queue folder.",
+      language: "javascript",
+      content: `/**
+ * ============================================================================
+ * TWO-WAY EMAIL ANSWERING BRIDGE (Simplified Code.gs)
+ * Outlook -> Gmail -> G.A.S. + Sheet -> Gemini -> G.A.S. -> Outlook Folder -> PA
+ * ============================================================================
+ */
+const GEMINI_KEY = "PASTE_YOUR_FREE_GEMINI_API_KEY_HERE"; // <-- EDIT THIS
+const OUTLOOK_BRIDGE_EMAIL = "your.name@unifr.ch";        // <-- EDIT THIS
+
+function processIncomingRelayEmails() {
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  const processedLabel = getOrCreateLabel_("AI-Processed");
+
+  // 1. Auto-detect relay emails sent by Power Automate Flow #1
+  const threads = GmailApp.search('subject:"[AI-RELAY]" -label:AI-Processed', 0, 10);
+
+  threads.forEach((thread) => {
+    const msg = thread.getMessages()[0];
+    // Expected body format: sender@unifr.ch | Original Subject | Question body
+    const parts = msg.getPlainBody().split("|").map(s => s.trim());
+    const sender = parts[0] || msg.getFrom();
+    const origSubject = parts[1] || "Inquiry";
+    const questionBody = parts[2] || msg.getPlainBody();
+
+    // 2. Store safely in Google Sheet
+    const rowIdx = sheet.getLastRow() + 1;
+    sheet.getRange(rowIdx, 1, 1, 4).setValues([[sender, origSubject, questionBody, "Processing..."]]);
+
+    // 3. Call Gemini API for a polite, concise email reply
+    const aiReply = askGeminiForReply_(origSubject, questionBody);
+
+    // 4. Update Spreadsheet & send structured return email to Outlook sub-folder
+    sheet.getRange(rowIdx, 5, 1, 2).setValues([[aiReply, "✅ Relayed to Outlook"]]);
+
+    GmailApp.sendEmail(
+      OUTLOOK_BRIDGE_EMAIL,
+      \`[AI-RETURN] | \${sender} | Re: \${origSubject}\`,
+      aiReply
+    );
+
+    // 5. Apply custom label & move relay to Trash so Gmail stays spotless
+    thread.addLabel(processedLabel);
+    thread.moveToTrash();
+  });
+}
+
+function askGeminiForReply_(subject, body) {
+  const url = \`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=\${GEMINI_KEY}\`;
+  const payload = {
+    contents: [{
+      parts: [{
+        text: \`Draft a concise, helpful academic email reply (max 4 sentences) to this inquiry.\\nSubject: \${subject}\\nMessage: \${body}\`
+      }]
+    }]
+  };
+  const res = UrlFetchApp.fetch(url, {
+    method: "post",
+    contentType: "application/json",
+    payload: JSON.stringify(payload)
+  });
+  const data = JSON.parse(res.getContentText());
+  return data.candidates[0].content.parts[0].text.trim();
+}
+
+function getOrCreateLabel_(name) {
+  return GmailApp.getUserLabelByName(name) || GmailApp.createLabel(name);
 }`
     },
 
